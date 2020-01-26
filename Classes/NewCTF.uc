@@ -10,6 +10,7 @@ enum EAnnouncement {
     ANN_FlagTaken,
     ANN_FlagCaptured,
     ANN_Overtime,
+    ANN_AdvantageGeneric,
     ANN_Advantage,
     ANN_Draw,
     ANN_Win,
@@ -35,8 +36,8 @@ var()            config bool bAllowOvertime;
 // Extra time if a flag is in play when the game ends, 0 for no limit
 var()            config int AdvantageExtraSeconds;
 
-var byte AdvantageTeam;
-var CTFFlag AdvantageFlag;
+var bool bAdvantage;
+var bool bAdvantageDone;
 var int AdvantageCountdown;
 
 // size of array should be the result of MaxNumTeams*MaxNumSpawnPointsPerTeam
@@ -153,6 +154,7 @@ function bool SetEndCams(string Reason) {
     local CTFReplicationInfo ctfState;
     local int numFlagsHeld;
     local bool draw;
+    local bool AllFlagsHome;
 
     ctfState = CTFReplicationInfo(GameReplicationInfo);
     draw = false;
@@ -174,29 +176,21 @@ function bool SetEndCams(string Reason) {
         }
     }
 
-    if (AdvantageFlag == none) { // no double advantage
-        numFlagsHeld = 0;
-        for (i = 0; i < MaxTeams; i++) {
-            if (ctfState.FlagList[i] != none && ctfState.FlagList[i].IsInState('Held')) {
-                BestFlag = ctfState.FlagList[i];
-                numFlagsHeld++;
-            }
-        }
+    for (i = 0; i < MaxTeams; i++)
+        AllFlagsHome = AllFlagsHome && ctfState.FlagList[i].bHome;
 
-        if (numFlagsHeld == 1) {
-            AdvantageTeam = BestFlag.Holder.PlayerReplicationInfo.Team;
-            AdvantageFlag = BestFlag;
-            AdvantageCountdown = AdvantageExtraSeconds;
-            Announce(ANN_Advantage, AdvantageTeam);
-            return false;
-        }
+    if (bAdvantageDone == false && AllFlagsHome == false) {
+        bAdvantage = true;
+        AdvantageCountdown = AdvantageExtraSeconds;
+        Announce(ANN_AdvantageGeneric);
+        return false;
     }
 
     if (draw) {
         GameReplicationInfo.GameEndedComments = "Draw";
 
         EndTime = Level.TimeSeconds + 3.0;
-        for (P = Level.PawnList; P != none; P = P.nextPawn) {
+        for (P = Level.PawnList; P != none; P = P.NextPawn) {
             P.GotoState('GameEnded');
             Player = PlayerPawn(P);
             if (Player != none) {
@@ -215,45 +209,61 @@ function bool SetEndCams(string Reason) {
 
         CalcEndStats();
         Announce(ANN_Draw);
-        return true;
-    }
+    } else {
+        // find winner
+        ForEach AllActors(class'CTFFlag', BestFlag)
+            if ( BestFlag.Team == Best.TeamIndex )
+                break;
 
-    // find winner
-    ForEach AllActors(class'CTFFlag', BestFlag)
-        if ( BestFlag.Team == Best.TeamIndex )
-            break;
+        BestBase = BestFlag.HomeBase;
+        GameReplicationInfo.GameEndedComments = TeamPrefix@Best.TeamName@GameEndedMessage;
 
-    BestBase = BestFlag.HomeBase;
-    GameReplicationInfo.GameEndedComments = TeamPrefix@Best.TeamName@GameEndedMessage;
-
-    EndTime = Level.TimeSeconds + 3.0;
-    for (P = Level.PawnList; P != None; P = P.nextPawn) {
-        P.GotoState('GameEnded');
-        Player = PlayerPawn(P);
-        if (Player != None)
-        {
-            Player.bBehindView = true;
-            Player.ViewTarget = BestBase;
-            if (!bTutorialGame)
-                PlayWinMessage(Player, (Player.PlayerReplicationInfo.Team == Best.TeamIndex));
-            Player.ClientGameEnded();
+        EndTime = Level.TimeSeconds + 3.0;
+        for (P = Level.PawnList; P != None; P = P.nextPawn) {
+            P.GotoState('GameEnded');
+            Player = PlayerPawn(P);
+            if (Player != None)
+            {
+                Player.bBehindView = true;
+                Player.ViewTarget = BestBase;
+                if (!bTutorialGame)
+                    PlayWinMessage(Player, (Player.PlayerReplicationInfo.Team == Best.TeamIndex));
+                Player.ClientGameEnded();
+            }
         }
+        BestBase.bHidden = false;
+        BestFlag.bHidden = true;
+        CalcEndStats();
     }
-    BestBase.bHidden = false;
-    BestFlag.bHidden = true;
-    CalcEndStats();
     return true;
 }
 
 function Timer() {
+    local CTFReplicationInfo ctfState;
+    local bool AllFlagsHome;
+    local int i;
+    local Pawn P;
+
     Super.Timer();
 
-    if (AdvantageFlag != none) {
+    ctfState = CTFReplicationInfo(GameReplicationInfo);
+    AllFlagsHome = true;
+    for (i = 0; i < MaxTeams; i++) {
+        AllFlagsHome = AllFlagsHome && ctfState.FlagList[i].bHome;
+    }
+    if (bAdvantage) {
         AdvantageCountdown--;
-        if (AdvantageCountdown == 0 ||
-            AdvantageFlag.IsInState('Home')) {
+
+        if (AdvantageCountdown <= 10) {
+            for (P = Level.PawnList; P != none; P = P.NextPawn)
+                if (P.IsA('TournamentPlayer'))
+                    TournamentPlayer(P).TimeMessage(AdvantageCountdown);
+        }
+
+        if (AdvantageCountdown == 0 || AllFlagsHome) {
+            bAdvantageDone = true;
+            bAdvantage = false;
             EndGame("timelimit");
-            AdvantageFlag = none;
         }
     }
 }
@@ -371,6 +381,8 @@ function sound GetAnnouncementSound(EAnnouncement A, optional byte Team) {
         return CTFAnnouncerClass.Default.FlagScored[Team];
     case ANN_Overtime:
         return CTFAnnouncerClass.Default.Overtime;
+    case ANN_AdvantageGeneric:
+        return CTFAnnouncerClass.Default.AdvantageGeneric;
     case ANN_Advantage:
         return CTFAnnouncerClass.Default.Advantage[Team];
     case ANN_Draw:

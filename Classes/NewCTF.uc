@@ -1,6 +1,8 @@
 class NewCTF extends BotPack.CTFGame
     config;
 
+#exec AUDIO IMPORT FILE="Sounds\flagalarm.wav" NAME="FlagAlarm"
+
 const MaxNumSpawnPointsPerTeam = 16;
 const MaxNumTeams = 4;
 
@@ -111,6 +113,7 @@ function InitFlags() {
         oldF.Destroy(); // now we can safetly destroy the old flag
 
         FB.bHidden = false; // fix the FlagBase
+        FB.TakenSound = sound'NewCTF.FlagAlarm';
 
         F = FB.Spawn(class'NewCTFFlag');
         F.HomeBase = FB;

@@ -16,6 +16,7 @@ class NewCTFAnnouncer extends Object;
 
 #exec AUDIO IMPORT FILE="Sounds\overtime.wav" NAME="Overtime"
 #exec AUDIO IMPORT FILE="Sounds\Draw_Game.wav" NAME="Draw"
+#exec AUDIO IMPORT FILE="Sounds\gotflag.wav" NAME="GotFlag"
 
 var sound FlagDropped[4];
 var sound FlagReturned[4];
@@ -25,6 +26,7 @@ var sound Overtime;
 var sound Advantage[4];
 var sound Draw;
 var sound Win[4];
+var sound GotFlag;
 
 defaultproperties {
     FlagDropped(0)=sound'NewCTF.RedFlagDropped'
@@ -60,4 +62,6 @@ defaultproperties {
     Win(1)=sound'NewCTF.BlueTeamWins'
     Win(2)=none
     Win(3)=none
+
+    GotFlag=sound'NewCTF.GotFlag'
 }

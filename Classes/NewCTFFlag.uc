@@ -7,7 +7,9 @@ state Held {
     function BeginState() {
         super.BeginState();
 
-        NewCTF(Level.Game).Announce(ANN_FlagTaken, Team);
+        NewCTF(Level.Game).Announce(ANN_FlagTaken, Team, Holder);
+        if (PlayerPawn(Holder) != none)
+            NewCTF(Level.Game).AnnounceForPlayer(ANN_GotFlag, PlayerPawn(Holder));
     }
 
     function EndState() {

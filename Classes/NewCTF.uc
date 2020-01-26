@@ -12,7 +12,8 @@ enum EAnnouncement {
     ANN_Overtime,
     ANN_Advantage,
     ANN_Draw,
-    ANN_Win
+    ANN_Win,
+    ANN_GotFlag
 };
 var(Announcer)   config class<NewCTFAnnouncer> CTFAnnouncerClass;
 
@@ -44,7 +45,7 @@ var int         TeamSpawnCount[4];
 
 replication {
     reliable if (Role == ROLE_Authority)
-        Announce;
+        Announce, AnnounceForPlayer;
 }
 
 function InitSpawnSystem()
@@ -345,45 +346,48 @@ function NavigationPoint FindPlayerStart(Pawn Player, optional byte InTeam, opti
     return super.FindPlayerStart(Player, InTeam, incomingName);
 }
 
-function PlayForAll(sound S, optional bool interruptible)
+function PlayForAll(sound S, optional bool interruptible, optional Pawn exclude)
 {
     local Pawn P;
     local PlayerPawn PP;
     for (P = Level.PawnList; P != none; P = P.NextPawn)
     {
+        if (P == exclude) continue;
         PP = PlayerPawn(P);
         if (PP != none)
             PP.ClientReliablePlaySound(S, false, true);
     }
 }
 
-simulated function Announce(EAnnouncement AnnouncementID, optional byte Team) {
-    switch (AnnouncementID) {
+function sound GetAnnouncementSound(EAnnouncement A, optional byte Team) {
+    switch (A) {
     case ANN_FlagDropped:
-        PlayForAll(CTFAnnouncerClass.Default.FlagDropped[Team], true);
-        break;
+        return CTFAnnouncerClass.Default.FlagDropped[Team];
     case ANN_FlagReturned:
-        PlayForAll(CTFAnnouncerClass.Default.FlagReturned[Team]);
-        break;
+        return CTFAnnouncerClass.Default.FlagReturned[Team];
     case ANN_FlagTaken:
-        PlayForAll(CTFAnnouncerClass.Default.FlagTaken[Team]);
-        break;
+        return CTFAnnouncerClass.Default.FlagTaken[Team];
     case ANN_FlagCaptured:
-        PlayForAll(CTFAnnouncerClass.Default.FlagScored[Team]);
-        break;
+        return CTFAnnouncerClass.Default.FlagScored[Team];
     case ANN_Overtime:
-        PlayForAll(CTFAnnouncerClass.Default.Overtime);
-        break;
+        return CTFAnnouncerClass.Default.Overtime;
     case ANN_Advantage:
-        PlayForAll(CTFAnnouncerClass.Default.Advantage[Team]);
-        break;
+        return CTFAnnouncerClass.Default.Advantage[Team];
     case ANN_Draw:
-        PlayForAll(CTFAnnouncerClass.Default.Draw);
-        break;
+        return CTFAnnouncerClass.Default.Draw;
     case ANN_Win:
-        PlayForAll(CTFAnnouncerClass.Default.Win[Team]);
-        break;
+        return CTFAnnouncerClass.Default.Win[Team];
+    case ANN_GotFlag:
+        return CTFAnnouncerClass.Default.GotFlag;
     }
+}
+
+simulated function Announce(EAnnouncement AnnouncementID, optional byte Team, optional Pawn exclude) {
+    PlayForAll(GetAnnouncementSound(AnnouncementID, Team),, exclude);
+}
+
+simulated function AnnounceForPlayer(EAnnouncement AnnouncementID, PlayerPawn P, optional byte Team) {
+    P.ClientReliablePlaySound(GetAnnouncementSound(AnnouncementID, Team), false, true);
 }
 
 defaultproperties

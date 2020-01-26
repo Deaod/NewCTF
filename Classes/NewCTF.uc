@@ -179,7 +179,7 @@ function bool SetEndCams(string Reason) {
     for (i = 0; i < MaxTeams; i++)
         AllFlagsHome = AllFlagsHome && ctfState.FlagList[i].bHome;
 
-    if (bAdvantageDone == false && AllFlagsHome == false) {
+    if (bAdvantageDone == false && bAdvantage == false && AllFlagsHome == false) {
         bAdvantage = true;
         AdvantageCountdown = AdvantageExtraSeconds;
         Announce(ANN_AdvantageGeneric);

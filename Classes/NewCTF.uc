@@ -265,8 +265,8 @@ function Timer() {
 
         if (AdvantageCountdown == 0 || AllFlagsHome) {
             bAdvantageDone = true;
-            bAdvantage = false;
             EndGame("timelimit");
+            bAdvantage = false;
         }
     }
 }

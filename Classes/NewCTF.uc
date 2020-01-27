@@ -62,13 +62,11 @@ function InitSpawnSystem()
         TeamSpawnCount[i] = 0;
 
     // find the list of spawn points for each team up to a maximum
-    for(N = Level.NavigationPointList; N != none; N = N.NextNavigationPoint)
-    {
+    for(N = Level.NavigationPointList; N != none; N = N.NextNavigationPoint) {
         PS = PlayerStart(N);
-        if (PS != none)
-        {
+        if (PS != none) {
             PSTeam = PS.TeamNumber;
-            if (TeamSpawnCount[PSTeam] < MaxNumSpawnPointsPerTeam) {
+            if (PSTeam < MaxNumTeams && TeamSpawnCount[PSTeam] < MaxNumSpawnPointsPerTeam) {
                 PlayerStartList[PSTeam*MaxNumSpawnPointsPerTeam + TeamSpawnCount[PSTeam]] = PS;
                 TeamSpawnCount[PSTeam] += 1;
             }
@@ -76,11 +74,9 @@ function InitSpawnSystem()
     }
 
     // give each teams list of spawn points a little shake
-    for (i = 0; i < MaxNumTeams; i++)
-    {
+    for (i = 0; i < MaxNumTeams; i++) {
         offset = i*MaxNumSpawnPointsPerTeam;
-        for(j = 0; j < TeamSpawnCount[i]; j++)
-        {
+        for(j = 0; j < TeamSpawnCount[i]; j++) {
             swapTarget = Rand(TeamSpawnCount[i]);
             PS = PlayerStartList[offset + swapTarget];
             PlayerStartList[offset + swapTarget] = PlayerStartList[offset + j];
@@ -273,26 +269,24 @@ function Timer() {
 
 function bool IsEnemyOfTeam(Pawn P, byte team)
 {
-    return P.PlayerReplicationInfo != none
-        && P.PlayerReplicationInfo.Team != team
-        && P.Health > 0
-        && P.IsA('Spectator') == false;
+    return (P.PlayerReplicationInfo != none)
+        && (P.PlayerReplicationInfo.Team != team)
+        && (P.Health > 0)
+        && (P.IsA('Spectator') == false);
 }
 
 function bool IsFriendOfTeam(Pawn P, byte team)
 {
-    return P.PlayerReplicationInfo != none
-        && P.PlayerReplicationInfo.Team == team
-        && P.Health > 0
-        && P.IsA('Spectator') == false;
+    return (P.PlayerReplicationInfo != none)
+        && (P.PlayerReplicationInfo.Team == team)
+        && (P.Health > 0)
+        && (P.IsA('Spectator') == false);
 }
 
 function bool IsPlayerStartViable(PlayerStart PS)
 {
     local Pawn P;
     local CTFFlag F;
-
-    if (PS.bEnabled == false) return false;
 
     foreach PS.RadiusActors(class'Pawn', P, SpawnEnemyBlockRange)
         if (IsEnemyOfTeam(P, PS.TeamNumber))
@@ -319,7 +313,7 @@ function bool IsPlayerStartViable(PlayerStart PS)
 function NavigationPoint FindPlayerStart(Pawn Player, optional byte InTeam, optional string incomingName)
 {
     local int i;
-    local int j;
+    local int end;
     local int team;
     local int psOffset;
     local PlayerStart PS;
@@ -341,14 +335,15 @@ function NavigationPoint FindPlayerStart(Pawn Player, optional byte InTeam, opti
        return super.FindPlayerStart(Player, InTeam, incomingName);
 
     psOffset = team * MaxNumSpawnPointsPerTeam;
-    for (i = 0; i < TeamSpawnCount[team]; i++)
-    {
+    for (i = 0; i < TeamSpawnCount[team]; i++) {
         PS = PlayerStartList[psOffset + i];
 
-        if (IsPlayerStartViable(PS))
-        {
-            for (i = i; i < TeamSpawnCount[team] - 1; i++)
+        if (IsPlayerStartViable(PS)) {
+            end = TeamSpawnCount[team] - 1;
+            while (i < end) {
                 PlayerStartList[psOffset + i] = PlayerStartList[psOffset + i + 1];
+                i++;
+            }
 
             PlayerStartList[psOffset + i + 1] = PS;
 
@@ -409,11 +404,11 @@ defaultproperties
 {
      CTFAnnouncerClass=class'NewCTFAnnouncer'
      SpawnSystemThreshold=4
-     SpawnEnemyBlockRange=400.0
-     SpawnEnemyVisionBlockRange=800.0
-     SpawnFriendlyBlockRange=120.0
-     SpawnFriendlyVisionBlockRange=120.0
-     SpawnFlagBlockRange=400.0
+     SpawnEnemyBlockRange=500.0
+     SpawnEnemyVisionBlockRange=1000.0
+     SpawnFriendlyBlockRange=150.0
+     SpawnFriendlyVisionBlockRange=150.0
+     SpawnFlagBlockRange=500.0
      bAllowOvertime=False
      AdvantageExtraSeconds=60;
 

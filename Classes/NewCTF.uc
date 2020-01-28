@@ -359,7 +359,7 @@ function NavigationPoint FindPlayerStart(Pawn Player, optional byte InTeam, opti
                 i++;
             }
 
-            PlayerStartList[psOffset + i + 1] = PS;
+            PlayerStartList[psOffset + i] = PS;
 
             return PS;
         }

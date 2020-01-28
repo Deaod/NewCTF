@@ -201,8 +201,6 @@ function bool SetEndCams(string Reason) {
 
     if (Best == none) {
         GameReplicationInfo.GameEndedComments = "Draw";
-
-        Announce(ANN_Draw);
     } else {
         GameReplicationInfo.GameEndedComments = TeamPrefix@Best.TeamName@GameEndedMessage;
         BestBase = ctfState.FlagList[Best.TeamIndex].HomeBase;
@@ -230,6 +228,9 @@ function bool SetEndCams(string Reason) {
         ctfState.FlagList[i].bHidden = true;
     }
 
+    if (Best == none) {
+        Announce(ANN_Draw);
+    }
     CalcEndStats();
 
     return true;

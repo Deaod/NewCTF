@@ -34,9 +34,9 @@ var(SpawnSystem) config float SpawnFriendlyVisionBlockRange;
 var(SpawnSystem) config float SpawnFlagBlockRange;
 
 // True results in default behavior, False activates an advantage system
-var()            config bool bAllowOvertime;
+var(Overtime)    config bool bAllowOvertime;
 // Extra time if a flag is in play when the game ends, 0 for no limit
-var()            config int AdvantageExtraSeconds;
+var(Advantage)   config int AdvantageExtraSeconds;
 
 var bool bAdvantage;
 var bool bAdvantageDone;
@@ -49,6 +49,20 @@ var int         TeamSpawnCount[4];
 replication {
     reliable if (Role == ROLE_Authority)
         Announce, AnnounceForPlayer;
+}
+
+event InitGame(string Options, out string Error) {
+    local string opt;
+
+    super.InitGame(Options, Error);
+
+    opt = ParseOption(Options, "AllowOvertime");
+    if (opt != "" && !(opt ~= "false"))
+        bAllowOvertime = true;
+
+    opt = ParseOption(Options, "AdvantageDuration");
+    if (opt != "")
+        AdvantageExtraSeconds = float(opt);
 }
 
 function InitSpawnSystem()

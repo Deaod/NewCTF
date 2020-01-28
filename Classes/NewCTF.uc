@@ -36,7 +36,7 @@ var(SpawnSystem) config float SpawnFlagBlockRange;
 // True results in default behavior, False activates an advantage system
 var(Overtime)    config bool bAllowOvertime;
 // Extra time if a flag is in play when the game ends, 0 for no limit
-var(Advantage)   config int AdvantageExtraSeconds;
+var(Advantage)   config int  AdvantageDuration;
 
 var bool bAdvantage;
 var bool bAdvantageDone;
@@ -62,7 +62,7 @@ event InitGame(string Options, out string Error) {
 
     opt = ParseOption(Options, "AdvantageDuration");
     if (opt != "")
-        AdvantageExtraSeconds = float(opt);
+        AdvantageDuration = float(opt);
 }
 
 function InitSpawnSystem()
@@ -89,7 +89,7 @@ function InitSpawnSystem()
 
     // give each teams list of spawn points a little shake
     for (i = 0; i < MaxNumTeams; i++) {
-        offset = i*MaxNumSpawnPointsPerTeam;
+        offset = i * MaxNumSpawnPointsPerTeam;
         for(j = 0; j < TeamSpawnCount[i]; j++) {
             swapTarget = Rand(TeamSpawnCount[i]);
             PS = PlayerStartList[offset + swapTarget];
@@ -157,127 +157,127 @@ function PostBeginPlay() {
     InitFlags();
 }
 
-function bool SetEndCams(string Reason) {
-    local TeamInfo Best;
-    local FlagBase BestBase;
-    local CTFFlag BestFlag;
-    local Pawn P;
+// Returns the best team by score, or None if at least two teams are tied for first
+function TeamInfo GetBestTeam() {
     local int i;
-    local PlayerPawn Player;
-    local CTFReplicationInfo ctfState;
-    local int numFlagsHeld;
-    local bool draw;
-    local bool AllFlagsHome;
-
-    ctfState = CTFReplicationInfo(GameReplicationInfo);
-    draw = false;
-
+    local TeamInfo Best;
     Best = Teams[0];
     for (i = 1; i < MaxTeams; i++)
         if (Best.Score < Teams[i].Score)
             Best = Teams[i];
 
-
-    for (i = 0; i < MaxTeams; i++) {
-        if ((Best.TeamIndex != i) && (Best.Score == Teams[i].Score)) {
-            draw = true;
-            if (bAllowOvertime) {
-                BroadcastLocalizedMessage(DMMessageClass, 0);
-                Announce(ANN_Overtime);
-                return false;
-            }
-        }
-    }
-
     for (i = 0; i < MaxTeams; i++)
-        AllFlagsHome = AllFlagsHome && ctfState.FlagList[i].bHome;
+        if (Teams[i] != Best && Best.Score == Teams[i].Score)
+            return none;
 
-    if (bAdvantageDone == false && bAdvantage == false && AllFlagsHome == false) {
-        bAdvantage = true;
-        AdvantageCountdown = AdvantageExtraSeconds;
-        Announce(ANN_AdvantageGeneric);
-        return false;
-    }
-
-    if (draw) {
-        GameReplicationInfo.GameEndedComments = "Draw";
-
-        EndTime = Level.TimeSeconds + 3.0;
-        for (P = Level.PawnList; P != none; P = P.NextPawn) {
-            P.GotoState('GameEnded');
-            Player = PlayerPawn(P);
-            if (Player != none) {
-                Player.bBehindView = true;
-                Player.ViewTarget = ctfState.FlagList[Player.PlayerReplicationInfo.Team].HomeBase;
-                Player.ClientGameEnded();
-            }
-        }
-
-        for (i = 0; i < MaxTeams; i++) {
-            if (ctfState.FlagList[i] != none) {
-                ctfState.FlagList[i].HomeBase.bHidden = false;
-                ctfState.FlagList[i].bHidden = true;
-            }
-        }
-
-        CalcEndStats();
-        Announce(ANN_Draw);
-    } else {
-        // find winner
-        ForEach AllActors(class'CTFFlag', BestFlag)
-            if ( BestFlag.Team == Best.TeamIndex )
-                break;
-
-        BestBase = BestFlag.HomeBase;
-        GameReplicationInfo.GameEndedComments = TeamPrefix@Best.TeamName@GameEndedMessage;
-
-        EndTime = Level.TimeSeconds + 3.0;
-        for (P = Level.PawnList; P != None; P = P.nextPawn) {
-            P.GotoState('GameEnded');
-            Player = PlayerPawn(P);
-            if (Player != None)
-            {
-                Player.bBehindView = true;
-                Player.ViewTarget = BestBase;
-                if (!bTutorialGame)
-                    PlayWinMessage(Player, (Player.PlayerReplicationInfo.Team == Best.TeamIndex));
-                Player.ClientGameEnded();
-            }
-        }
-        BestBase.bHidden = false;
-        BestFlag.bHidden = true;
-        CalcEndStats();
-    }
-    return true;
+    return Best;
 }
 
-function Timer() {
-    local CTFReplicationInfo ctfState;
-    local bool AllFlagsHome;
+function bool IsEveryFlagHome() {
     local int i;
-    local Pawn P;
-
-    Super.Timer();
+    local bool AllFlagsHome;
+    local CTFReplicationInfo ctfState;
 
     ctfState = CTFReplicationInfo(GameReplicationInfo);
     AllFlagsHome = true;
-    for (i = 0; i < MaxTeams; i++) {
+    for (i = 0; i < MaxTeams; i++)
         AllFlagsHome = AllFlagsHome && ctfState.FlagList[i].bHome;
+
+    return AllFlagsHome;
+}
+
+function bool SetEndCams(string Reason) {
+    local TeamInfo Best;
+    local FlagBase BestBase;
+    local Pawn P;
+    local int i;
+    local PlayerPawn Player;
+    local CTFReplicationInfo ctfState;
+
+    ctfState = CTFReplicationInfo(GameReplicationInfo);
+    Best = GetBestTeam();
+
+    EndTime = Level.TimeSeconds + 3.0;
+
+    if (Best == none) {
+        GameReplicationInfo.GameEndedComments = "Draw";
+
+        Announce(ANN_Draw);
+    } else {
+        GameReplicationInfo.GameEndedComments = TeamPrefix@Best.TeamName@GameEndedMessage;
+        BestBase = ctfState.FlagList[Best.TeamIndex].HomeBase;
     }
+
+    for (P = Level.PawnList; P != none; P = P.NextPawn) {
+        P.GotoState('GameEnded');
+        Player = PlayerPawn(P);
+        if (Player != none) {
+            Player.bBehindView = true;
+            if (Best == none) {
+                if (Player.PlayerReplicationInfo.Team < MaxTeams)
+                    Player.ViewTarget = ctfState.FlagList[Player.PlayerReplicationInfo.Team].HomeBase;
+            } else {
+                Player.ViewTarget = BestBase;
+                PlayWinMessage(Player, (Player.PlayerReplicationInfo.Team == Best.TeamIndex));
+            }
+            Player.ClientGameEnded();
+        }
+    }
+
+    // show all flags on their respective FlagBases
+    for (i = 0; i < MaxTeams; i++) {
+        ctfState.FlagList[i].HomeBase.bHidden = false;
+        ctfState.FlagList[i].bHidden = true;
+    }
+
+    CalcEndStats();
+
+    return true;
+}
+
+function DistributeTrigger(name event, optional Actor other, optional Pawn instigator) {
+    local actor A;
+    foreach AllActors(class'Actor', A, event)
+        A.trigger(other, instigator);
+}
+
+function EndGame(string reason) {
+    if (reason ~= "timelimit") {
+        if (bAllowOvertime && GetBestTeam() == none) {
+            bOverTime = true;
+            BroadcastLocalizedMessage(DMMessageClass, 0);
+            Announce(ANN_Overtime);
+            return;
+        }
+
+        if (bAdvantageDone == false && bAdvantage == false && IsEveryFlagHome() == false) {
+            bAdvantage = true;
+            AdvantageCountdown = AdvantageDuration;
+            RemainingTime = AdvantageDuration;
+            GameReplicationInfo.RemainingMinute = ((AdvantageDuration / 60) + 1) * 60;
+            Announce(ANN_AdvantageGeneric);
+            return;
+        }
+    }
+
+    super.EndGame(reason);
+}
+
+function Timer() {
     if (bAdvantage) {
         AdvantageCountdown--;
 
-        if (AdvantageCountdown <= 10) {
-            for (P = Level.PawnList; P != none; P = P.NextPawn)
-                if (P.IsA('TournamentPlayer'))
-                    TournamentPlayer(P).TimeMessage(AdvantageCountdown);
-        }
-
-        if (AdvantageCountdown == 0 || AllFlagsHome) {
+        if (AdvantageCountdown == 0 || IsEveryFlagHome()) {
             bAdvantageDone = true;
-            EndGame("timelimit");
-            bAdvantage = false;
+            RemainingTime = 1;
+            GameReplicationInfo.RemainingMinute = 60;
         }
+    }
+
+    Super.Timer();
+
+    if (bAdvantage && bAdvantageDone) {
+        bAdvantage = false;
     }
 }
 
@@ -424,7 +424,7 @@ defaultproperties
      SpawnFriendlyVisionBlockRange=150.0
      SpawnFlagBlockRange=500.0
      bAllowOvertime=False
-     AdvantageExtraSeconds=60;
+     AdvantageDuration=60;
 
      CaptureSound(0)=none
      CaptureSound(1)=none

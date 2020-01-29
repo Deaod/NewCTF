@@ -13,9 +13,7 @@ enum EAnnouncement {
     ANN_FlagCaptured,
     ANN_Overtime,
     ANN_AdvantageGeneric,
-    ANN_Advantage,
     ANN_Draw,
-    ANN_Win,
     ANN_GotFlag
 };
 var(Announcer)   config class<NewCTFAnnouncer> CTFAnnouncerClass;
@@ -255,7 +253,7 @@ function EndGame(string reason) {
             bAdvantage = true;
             AdvantageCountdown = AdvantageDuration;
             RemainingTime = AdvantageDuration;
-            GameReplicationInfo.RemainingMinute = ((AdvantageDuration / 60) + 1) * 60;
+            GameReplicationInfo.RemainingMinute = AdvantageDuration;
             Announce(ANN_AdvantageGeneric);
             return;
         }
@@ -271,7 +269,6 @@ function Timer() {
         if (AdvantageCountdown == 0 || IsEveryFlagHome()) {
             bAdvantageDone = true;
             RemainingTime = 1;
-            GameReplicationInfo.RemainingMinute = 60;
         }
     }
 
@@ -396,12 +393,8 @@ function sound GetAnnouncementSound(EAnnouncement A, optional byte Team) {
         return CTFAnnouncerClass.Default.Overtime;
     case ANN_AdvantageGeneric:
         return CTFAnnouncerClass.Default.AdvantageGeneric;
-    case ANN_Advantage:
-        return CTFAnnouncerClass.Default.Advantage[Team];
     case ANN_Draw:
         return CTFAnnouncerClass.Default.Draw;
-    case ANN_Win:
-        return CTFAnnouncerClass.Default.Win[Team];
     case ANN_GotFlag:
         return CTFAnnouncerClass.Default.GotFlag;
     }
@@ -425,7 +418,7 @@ defaultproperties
      SpawnFriendlyVisionBlockRange=150.0
      SpawnFlagBlockRange=500.0
      bAllowOvertime=False
-     AdvantageDuration=60;
+     AdvantageDuration=60
 
      CaptureSound(0)=none
      CaptureSound(1)=none

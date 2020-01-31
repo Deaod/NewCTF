@@ -419,6 +419,7 @@ defaultproperties
      SpawnFlagBlockRange=500.0
      bAllowOvertime=False
      AdvantageDuration=60
+     HUDType=Class'newCTF.newChallengeCTFHUD'
 
      CaptureSound(0)=none
      CaptureSound(1)=none

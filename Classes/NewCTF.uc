@@ -299,22 +299,24 @@ function bool IsPlayerStartViable(PlayerStart PS)
 {
     local Pawn P;
     local CTFFlag F;
+    local bool visible;
+    local bool enemy, friend;
+    local float distance;
+    local vector eyeHeight;
 
-    foreach PS.RadiusActors(class'Pawn', P, SpawnEnemyBlockRange)
-        if (IsEnemyOfTeam(P, PS.TeamNumber))
-            return false;
+    for (P = Level.PawnList; P != none; P = P.NextPawn) {
+        enemy = IsEnemyOfTeam(P, PS.TeamNumber);
+        friend = IsFriendOfTeam(P, PS.TeamNumber);
 
-    foreach PS.VisibleActors(class'Pawn', P, SpawnEnemyVisionBlockRange)
-        if (IsEnemyOfTeam(P, PS.TeamNumber))
-            return false;
+        eyeHeight.Z = P.BaseEyeHeight;
+        visible = PS.FastTrace(P.Location + eyeHeight);
+        distance = VSize(PS.Location - P.Location + eyeHeight);
 
-    foreach PS.RadiusActors(class'Pawn', P, SpawnFriendlyBlockRange)
-        if (IsFriendOfTeam(P, PS.TeamNumber))
-            return false;
-
-    foreach PS.VisibleActors(class'Pawn', P, SpawnFriendlyVisionBlockRange)
-        if (IsFriendOfTeam(P, PS.TeamNumber))
-            return false;
+        if ( enemy &&  visible && distance <= SpawnEnemyVisionBlockRange)    return false;
+        if ( enemy && !visible && distance <= SpawnEnemyBlockRange)          return false;
+        if (friend &&  visible && distance <= SpawnFriendlyVisionBlockRange) return false;
+        if (friend && !visible && distance <= SpawnFriendlyBlockRange)       return false;
+    }
 
     foreach PS.RadiusActors(class'CTFFlag', F, SpawnFlagBlockRange)
         return false;
@@ -419,7 +421,7 @@ defaultproperties
      SpawnFlagBlockRange=500.0
      bAllowOvertime=False
      AdvantageDuration=60
-     HUDType=Class'newCTF.newChallengeCTFHUD'
+     HUDType=class'newCTF.newChallengeCTFHUD'
 
      CaptureSound(0)=none
      CaptureSound(1)=none

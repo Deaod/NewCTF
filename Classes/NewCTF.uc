@@ -6,16 +6,6 @@ class NewCTF extends BotPack.CTFGame
 const MaxNumSpawnPointsPerTeam = 16;
 const MaxNumTeams = 4;
 
-enum EAnnouncement {
-    ANN_FlagDropped,
-    ANN_FlagReturned,
-    ANN_FlagTaken,
-    ANN_FlagCaptured,
-    ANN_Overtime,
-    ANN_AdvantageGeneric,
-    ANN_Draw,
-    ANN_GotFlag
-};
 var(Announcer)   config class<NewCTFAnnouncer> CTFAnnouncerClass;
 
 // Number of player up until which the old spawn system is used
@@ -44,10 +34,7 @@ var int AdvantageCountdown;
 var PlayerStart PlayerStartList[64];
 var int         TeamSpawnCount[4];
 
-replication {
-    reliable if (Role == ROLE_Authority)
-        Announce, AnnounceForPlayer;
-}
+var NewCTFAnnouncer Announcers[32];
 
 event InitGame(string Options, out string Error) {
     local string opt;
@@ -155,6 +142,32 @@ function PostBeginPlay() {
     InitFlags();
 }
 
+event PostLogin(PlayerPawn NewPlayer){
+    local int i;
+
+    super.PostLogin(NewPlayer);
+
+    for (i = 0; i < 32; i++) {
+        if (Announcers[i] == none) {
+            Announcers[i] = NewPlayer.Spawn(CTFAnnouncerClass);
+            Announcers[i].LocalPlayer = NewPlayer;
+            break;
+        }
+    }
+}
+
+function Logout(Pawn Exiting) {
+    local int i;
+    super.Logout(Exiting);
+
+    if (PlayerPawn(Exiting) == none) return;
+
+    for (i = 0; i < 32; i++) {
+        if (Announcers[i] != none && Announcers[i].LocalPlayer == Exiting)
+            Announcers[i] = none;
+    }
+}
+
 // Returns the best team by score, or None if at least two teams are tied for first
 function TeamInfo GetBestTeam() {
     local int i;
@@ -227,7 +240,7 @@ function bool SetEndCams(string Reason) {
     }
 
     if (Best == none) {
-        Announce(ANN_Draw);
+        Announce(7);
     }
     CalcEndStats();
 
@@ -245,7 +258,7 @@ function EndGame(string reason) {
         if (bAllowOvertime && GetBestTeam() == none) {
             bOverTime = true;
             BroadcastLocalizedMessage(DMMessageClass, 0);
-            Announce(ANN_Overtime);
+            Announce(5);
             return;
         }
 
@@ -254,7 +267,7 @@ function EndGame(string reason) {
             AdvantageCountdown = AdvantageDuration;
             RemainingTime = AdvantageDuration;
             GameReplicationInfo.RemainingMinute = AdvantageDuration;
-            Announce(ANN_AdvantageGeneric);
+            Announce(6);
             return;
         }
     }
@@ -308,6 +321,8 @@ function bool IsPlayerStartViable(PlayerStart PS)
         enemy = IsEnemyOfTeam(P, PS.TeamNumber);
         friend = IsFriendOfTeam(P, PS.TeamNumber);
 
+        if (!enemy && !friend) continue;
+
         eyeHeight.Z = P.BaseEyeHeight;
         visible = PS.FastTrace(P.Location + eyeHeight);
         distance = VSize(PS.Location - P.Location + eyeHeight);
@@ -339,9 +354,9 @@ function NavigationPoint FindPlayerStart(Pawn Player, optional byte InTeam, opti
     else
         team = InTeam;
 
-    if( incomingName!="" )
+    if( incomingName != "" )
         foreach AllActors( class 'Teleporter', Tel )
-            if( string(Tel.Tag)~=incomingName )
+            if( string(Tel.Tag) ~= incomingName )
                 return Tel;
     // end of copy
 
@@ -368,46 +383,20 @@ function NavigationPoint FindPlayerStart(Pawn Player, optional byte InTeam, opti
     return super.FindPlayerStart(Player, InTeam, incomingName);
 }
 
-function PlayForAll(sound S, optional bool interruptible, optional Pawn exclude)
-{
-    local Pawn P;
-    local PlayerPawn PP;
-    for (P = Level.PawnList; P != none; P = P.NextPawn)
-    {
-        if (P == exclude) continue;
-        PP = PlayerPawn(P);
-        if (PP != none)
-            PP.ClientReliablePlaySound(S, false, true);
-    }
+function Announce(byte AnnouncementID, optional byte Team, optional Pawn exclude) {
+    local int i;
+
+    for (i = 0; i < 32; i++)
+        if (Announcers[i] != none && Announcers[i].LocalPlayer != exclude)
+            Announcers[i].Announce(AnnouncementID, Team, exclude);
 }
 
-function sound GetAnnouncementSound(EAnnouncement A, optional byte Team) {
-    switch (A) {
-    case ANN_FlagDropped:
-        return CTFAnnouncerClass.Default.FlagDropped[Team];
-    case ANN_FlagReturned:
-        return CTFAnnouncerClass.Default.FlagReturned[Team];
-    case ANN_FlagTaken:
-        return CTFAnnouncerClass.Default.FlagTaken[Team];
-    case ANN_FlagCaptured:
-        return CTFAnnouncerClass.Default.FlagScored[Team];
-    case ANN_Overtime:
-        return CTFAnnouncerClass.Default.Overtime;
-    case ANN_AdvantageGeneric:
-        return CTFAnnouncerClass.Default.AdvantageGeneric;
-    case ANN_Draw:
-        return CTFAnnouncerClass.Default.Draw;
-    case ANN_GotFlag:
-        return CTFAnnouncerClass.Default.GotFlag;
-    }
-}
+function AnnounceForPlayer(byte AnnouncementID, PlayerPawn P, optional byte Team) {
+    local int i;
 
-simulated function Announce(EAnnouncement AnnouncementID, optional byte Team, optional Pawn exclude) {
-    PlayForAll(GetAnnouncementSound(AnnouncementID, Team),, exclude);
-}
-
-simulated function AnnounceForPlayer(EAnnouncement AnnouncementID, PlayerPawn P, optional byte Team) {
-    P.ClientReliablePlaySound(GetAnnouncementSound(AnnouncementID, Team), false, true);
+    for (i = 0; i < 32; i++)
+        if (Announcers[i] != none && Announcers[i].LocalPlayer == P)
+            Announcers[i].AnnounceForPlayer(AnnouncementID, P, Team);
 }
 
 defaultproperties

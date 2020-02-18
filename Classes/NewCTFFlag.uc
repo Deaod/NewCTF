@@ -1,20 +1,12 @@
 class NewCTFFlag extends CTFFlag;
 
-// facilitates edge triggering
-var name OldState;
-
 state Held {
     function BeginState() {
         super.BeginState();
 
-        NewCTF(Level.Game).Announce(ANN_FlagTaken, Team, Holder);
+        NewCTF(Level.Game).Announce(3, Team, Holder);
         if (PlayerPawn(Holder) != none)
-            NewCTF(Level.Game).AnnounceForPlayer(ANN_GotFlag, PlayerPawn(Holder));
-    }
-
-    function EndState() {
-        OldState = 'Held';
-        super.EndState();
+            NewCTF(Level.Game).AnnounceForPlayer(8, PlayerPawn(Holder));
     }
 }
 
@@ -22,22 +14,29 @@ state Dropped {
     function BeginState() {
         super.BeginState();
 
-        NewCTF(Level.Game).Announce(ANN_FlagDropped, Team);
+        NewCTF(Level.Game).Announce(1, Team);
     }
 
-    function EndState() {
-        OldState = 'Dropped';
-        super.EndState();
+    function Touch(Actor Other)
+    {
+        local Pawn aPawn;
+
+        super.Touch(Other);
+
+        aPawn = Pawn(Other);
+        if (   aPawn != None
+            && aPawn.bIsPlayer
+            && aPawn.Health > 0
+            && aPawn.IsInState('FeigningDeath') == false
+            && aPawn.PlayerReplicationInfo.Team == Team
+        ) {
+            // returned flag
+            NewCTF(Level.Game).Announce(2, Team);
+        }
     }
 }
 
 auto state Home {
-    function BeginState() {
-        super.BeginState();
-        if (OldState == 'Dropped')
-            NewCTF(Level.Game).Announce(ANN_FlagReturned, Team);
-    }
-
     function Touch(Actor A) {
         local Pawn P;
 
@@ -48,19 +47,9 @@ auto state Home {
         }
 
         if (P.PlayerReplicationInfo.Team == Team && P.PlayerReplicationInfo.HasFlag != none) {
-            NewCTF(Level.Game).Announce(ANN_FlagCaptured, Team);
+            NewCTF(Level.Game).Announce(4, Team);
         }
 
         super.Touch(A);
     }
-
-    function EndState() {
-        OldState = 'Home';
-        super.EndState();
-    }
-}
-
-defaultproperties
-{
-    OldState='None'
 }

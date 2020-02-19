@@ -22,7 +22,5 @@ defaultproperties {
     FlagScored(3)=none
 
     Overtime=none
-    AdvantageGeneric=none
-    Draw=none
     GotFlag=none
 }

@@ -13,28 +13,19 @@ class NewCTFAnnouncer extends Actor;
 #exec AUDIO IMPORT FILE="Sounds\overtime.wav" NAME="Overtime"
 #exec AUDIO IMPORT FILE="Sounds\Draw_Game.wav" NAME="Draw"
 #exec AUDIO IMPORT FILE="Sounds\gotflag.wav" NAME="GotFlag"
-#exec AUDIO IMPORT FILE="Sounds\advantage.wav" NAME="AdvantageGeneric"
-
-const ANN_FlagDropped      = 1;
-const ANN_FlagReturned     = 2;
-const ANN_FlagTaken        = 3;
-const ANN_FlagCaptured     = 4;
-const ANN_Overtime         = 5;
-const ANN_AdvantageGeneric = 6;
-const ANN_Draw             = 7;
-const ANN_GotFlag          = 8;
+#exec AUDIO IMPORT FILE="Sounds\advantage.wav" name="AdvantageGeneric"
 
 const QueueSize = 16;
 
 // Sounds that should be replaced
-var sound FlagDropped[4];
-var sound FlagReturned[4];
-var sound FlagTaken[4];
-var sound FlagScored[4];
-var sound Overtime;
-var sound AdvantageGeneric;
-var sound Draw;
-var sound GotFlag;
+var() sound FlagDropped[4];
+var() sound FlagReturned[4];
+var() sound FlagTaken[4];
+var() sound FlagScored[4];
+var() sound Overtime;
+var() sound AdvantageGeneric;
+var() sound Draw;
+var() sound GotFlag;
 
 // Internal variables to make announcements overlap less
 struct Announcement {
@@ -45,6 +36,7 @@ struct Announcement {
 var PlayerPawn LocalPlayer;
 var Announcement AnnouncementQueue[16]; // QueueSize
 var bool AnnouncementPlaying;
+var float AnnouncerVolume;
 
 event Timer() {
     local int i;
@@ -53,7 +45,7 @@ event Timer() {
         return;
     }
 
-    GetLocalPlayer().ClientReliablePlaySound(AnnouncementQueue[0].S, false, true);
+    GetLocalPlayer().PlaySound(AnnouncementQueue[0].S, SLOT_Interface, AnnouncerVolume, false);
     SetTimer(AnnouncementQueue[0].Duration, false);
 
     for (i = 0; i < QueueSize - 1; i++) {
@@ -67,27 +59,27 @@ event Timer() {
 
 function sound GetAnnouncementSound(byte Ann, optional byte Team) {
     switch (Ann) {
-    case ANN_FlagDropped:
+    case 1:
         return FlagDropped[Team];
-    case ANN_FlagReturned:
+    case 2:
         return FlagReturned[Team];
-    case ANN_FlagTaken:
+    case 3:
         return FlagTaken[Team];
-    case ANN_FlagCaptured:
+    case 4:
         return FlagScored[Team];
-    case ANN_Overtime:
+    case 5:
         return Overtime;
-    case ANN_AdvantageGeneric:
+    case 6:
         return AdvantageGeneric;
-    case ANN_Draw:
+    case 7:
         return Draw;
-    case ANN_GotFlag:
+    case 8:
         return GotFlag;
     }
     return none;
 }
 
-function AnnounceInternal(byte A, byte Team) {
+function Announce(byte A, optional byte Team) {
     local Sound S;
     local float Duration;
     local int i;
@@ -98,7 +90,7 @@ function AnnounceInternal(byte A, byte Team) {
 
     if (AnnouncementPlaying == false) {
         AnnouncementPlaying = true;
-        GetLocalPlayer().ClientReliablePlaySound(S, false, true);
+        GetLocalPlayer().PlaySound(S, SLOT_Interface, AnnouncerVolume, false);
         SetTimer(Duration, false);
         return;
     }
@@ -126,24 +118,9 @@ function PlayerPawn GetLocalPlayer() {
     return LocalPlayer;
 }
 
-function Announce(byte AnnouncementID, optional byte Team, optional Pawn exclude) {
-    local PlayerPawn LP;
-    Log("Announce");
-    LP = GetLocalPlayer();
-    if (LP == none || LP == exclude) return;
-
-    AnnounceInternal(AnnouncementID, Team);
-}
-
-function AnnounceForPlayer(byte AnnouncementID, PlayerPawn P, optional byte Team) {
-    local PlayerPawn LP;
-    Log("AnnounceForPlayer");
-    LP = GetLocalPlayer();
-    if (LP != none && LP == P)
-        AnnounceInternal(AnnouncementID, Team);
-}
 
 defaultproperties {
+    RemoteRole=ROLE_None
     AnnouncementPlaying=false
 
     FlagDropped(0)=sound'NewCTF.RedFlagDropped'

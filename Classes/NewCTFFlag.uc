@@ -4,9 +4,21 @@ state Held {
     function BeginState() {
         super.BeginState();
 
-        NewCTF(Level.Game).Announce(3, Team, Holder);
-        if (PlayerPawn(Holder) != none)
-            NewCTF(Level.Game).AnnounceForPlayer(8, PlayerPawn(Holder));
+        BroadcastLocalizedMessage(
+            class'NewCTFMessages',
+            3, // FlagTaken
+            Holder.PlayerReplicationInfo,
+            none,
+            CTFGame(Level.Game).Teams[Team]
+        );
+
+        BroadcastLocalizedMessage(
+            class'NewCTFMessages',
+            8, // YouHaveTheFlag
+            none,
+            Holder.PlayerReplicationInfo,
+            CTFGame(Level.Game).Teams[Team]
+        );
     }
 }
 
@@ -14,7 +26,13 @@ state Dropped {
     function BeginState() {
         super.BeginState();
 
-        NewCTF(Level.Game).Announce(1, Team);
+        BroadcastLocalizedMessage(
+            class'NewCTFMessages',
+            1, // FlagDropped
+            none,
+            none,
+            CTFGame(Level.Game).Teams[Team]
+        );
     }
 
     function Touch(Actor Other)
@@ -30,8 +48,13 @@ state Dropped {
             && aPawn.IsInState('FeigningDeath') == false
             && aPawn.PlayerReplicationInfo.Team == Team
         ) {
-            // returned flag
-            NewCTF(Level.Game).Announce(2, Team);
+            BroadcastLocalizedMessage(
+                class'NewCTFMessages',
+                2, // FlagReturned
+                none,
+                none,
+                CTFGame(Level.Game).Teams[Team]
+            );
         }
     }
 }
@@ -47,7 +70,13 @@ auto state Home {
         }
 
         if (P.PlayerReplicationInfo.Team == Team && P.PlayerReplicationInfo.HasFlag != none) {
-            NewCTF(Level.Game).Announce(4, Team);
+            BroadcastLocalizedMessage(
+                class'NewCTFMessages',
+                4, // FlagCaptured
+                none,
+                none,
+                CTFGame(Level.Game).Teams[Team]
+            );
         }
 
         super.Touch(A);

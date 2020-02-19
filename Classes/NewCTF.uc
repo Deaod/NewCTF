@@ -6,8 +6,6 @@ class NewCTF extends BotPack.CTFGame
 const MaxNumSpawnPointsPerTeam = 16;
 const MaxNumTeams = 4;
 
-var(Announcer)   config class<NewCTFAnnouncer> CTFAnnouncerClass;
-
 // Number of player up until which the old spawn system is used
 var(SpawnSystem) config int   SpawnSystemThreshold;
 // Range within which any enemy, visible or not will block a spawn
@@ -33,8 +31,6 @@ var int AdvantageCountdown;
 // size of array should be the result of MaxNumTeams*MaxNumSpawnPointsPerTeam
 var PlayerStart PlayerStartList[64];
 var int         TeamSpawnCount[4];
-
-var NewCTFAnnouncer Announcers[32];
 
 event InitGame(string Options, out string Error) {
     local string opt;
@@ -142,32 +138,6 @@ function PostBeginPlay() {
     InitFlags();
 }
 
-event PostLogin(PlayerPawn NewPlayer){
-    local int i;
-
-    super.PostLogin(NewPlayer);
-
-    for (i = 0; i < 32; i++) {
-        if (Announcers[i] == none) {
-            Announcers[i] = NewPlayer.Spawn(CTFAnnouncerClass);
-            Announcers[i].LocalPlayer = NewPlayer;
-            break;
-        }
-    }
-}
-
-function Logout(Pawn Exiting) {
-    local int i;
-    super.Logout(Exiting);
-
-    if (PlayerPawn(Exiting) == none) return;
-
-    for (i = 0; i < 32; i++) {
-        if (Announcers[i] != none && Announcers[i].LocalPlayer == Exiting)
-            Announcers[i] = none;
-    }
-}
-
 // Returns the best team by score, or None if at least two teams are tied for first
 function TeamInfo GetBestTeam() {
     local int i;
@@ -240,7 +210,10 @@ function bool SetEndCams(string Reason) {
     }
 
     if (Best == none) {
-        Announce(7);
+        BroadcastLocalizedMessage(
+            class'NewCTFMessages',
+            7, // Draw
+        );
     }
     CalcEndStats();
 
@@ -258,7 +231,10 @@ function EndGame(string reason) {
         if (bAllowOvertime && GetBestTeam() == none) {
             bOverTime = true;
             BroadcastLocalizedMessage(DMMessageClass, 0);
-            Announce(5);
+            BroadcastLocalizedMessage(
+                class'NewCTFMessages',
+                5, // Overtime
+            );
             return;
         }
 
@@ -267,7 +243,10 @@ function EndGame(string reason) {
             AdvantageCountdown = AdvantageDuration;
             RemainingTime = AdvantageDuration;
             GameReplicationInfo.RemainingMinute = AdvantageDuration;
-            Announce(6);
+            BroadcastLocalizedMessage(
+                class'NewCTFMessages',
+                6, // Advantage
+            );
             return;
         }
     }
@@ -383,25 +362,8 @@ function NavigationPoint FindPlayerStart(Pawn Player, optional byte InTeam, opti
     return super.FindPlayerStart(Player, InTeam, incomingName);
 }
 
-function Announce(byte AnnouncementID, optional byte Team, optional Pawn exclude) {
-    local int i;
-
-    for (i = 0; i < 32; i++)
-        if (Announcers[i] != none && Announcers[i].LocalPlayer != exclude)
-            Announcers[i].Announce(AnnouncementID, Team, exclude);
-}
-
-function AnnounceForPlayer(byte AnnouncementID, PlayerPawn P, optional byte Team) {
-    local int i;
-
-    for (i = 0; i < 32; i++)
-        if (Announcers[i] != none && Announcers[i].LocalPlayer == P)
-            Announcers[i].AnnounceForPlayer(AnnouncementID, P, Team);
-}
-
 defaultproperties
 {
-     CTFAnnouncerClass=class'NewCTFAnnouncer'
      SpawnSystemThreshold=4
      SpawnEnemyBlockRange=500.0
      SpawnEnemyVisionBlockRange=1000.0

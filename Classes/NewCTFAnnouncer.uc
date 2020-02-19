@@ -45,7 +45,7 @@ event Timer() {
         return;
     }
 
-    GetLocalPlayer().PlaySound(AnnouncementQueue[0].S, SLOT_Interface, AnnouncerVolume, false);
+    GetLocalPlayer().PlayOwnedSound(AnnouncementQueue[0].S, SLOT_Interface, AnnouncerVolume, false);
     SetTimer(AnnouncementQueue[0].Duration, false);
 
     for (i = 0; i < QueueSize - 1; i++) {
@@ -90,7 +90,7 @@ function Announce(byte A, optional byte Team) {
 
     if (AnnouncementPlaying == false) {
         AnnouncementPlaying = true;
-        GetLocalPlayer().PlaySound(S, SLOT_Interface, AnnouncerVolume, false);
+        GetLocalPlayer().PlayOwnedSound(S, SLOT_Interface, AnnouncerVolume, false);
         SetTimer(Duration, false);
         return;
     }

@@ -16,8 +16,7 @@ state Held {
             class'NewCTFMessages',
             8, // YouHaveTheFlag
             none,
-            Holder.PlayerReplicationInfo,
-            CTFGame(Level.Game).Teams[Team]
+            Holder.PlayerReplicationInfo
         );
     }
 }

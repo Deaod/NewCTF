@@ -12,11 +12,9 @@ state Held {
             CTFGame(Level.Game).Teams[Team]
         );
 
-        BroadcastLocalizedMessage(
+        Holder.ReceiveLocalizedMessage(
             class'NewCTFMessages',
             8, // YouHaveTheFlag
-            none,
-            Holder.PlayerReplicationInfo
         );
     }
 }

@@ -1,8 +1,6 @@
 class NewCTF extends BotPack.CTFGame
     config;
 
-#exec AUDIO IMPORT FILE="Sounds\flagalarm.wav" NAME="FlagAlarm"
-
 const MaxNumSpawnPointsPerTeam = 16;
 const MaxNumTeams = 4;
 
@@ -104,7 +102,6 @@ function InitFlags() {
         oldF.Destroy(); // now we can safetly destroy the old flag
 
         FB.bHidden = false; // fix the FlagBase
-        FB.TakenSound = sound'NewCTF.FlagAlarm';
 
         F = FB.Spawn(class'NewCTFFlag');
         F.HomeBase = FB;
@@ -365,11 +362,11 @@ function NavigationPoint FindPlayerStart(Pawn Player, optional byte InTeam, opti
 defaultproperties
 {
      SpawnSystemThreshold=4
-     SpawnEnemyBlockRange=500.0
-     SpawnEnemyVisionBlockRange=1000.0
+     SpawnEnemyBlockRange=750.0
+     SpawnEnemyVisionBlockRange=1500.0
      SpawnFriendlyBlockRange=150.0
      SpawnFriendlyVisionBlockRange=150.0
-     SpawnFlagBlockRange=500.0
+     SpawnFlagBlockRange=750.0
      bAllowOvertime=False
      AdvantageDuration=60
      HUDType=class'newCTF.newChallengeCTFHUD'

@@ -27,14 +27,13 @@ static function ClientReceive(
         }
     }
 
-    if (   (PRI1 != none && P.PlayerReplicationInfo != PRI1)
-        || (PRI2 != none && P.PlayerReplicationInfo == PRI2)
-        || (PRI1 == none && PRI2 == none)
-    ) {
-        if (TeamInfo(O) != none)
-            default.Announcer.Announce(ID, TeamInfo(O).TeamIndex);
-        else
-            default.Announcer.Announce(ID);
+    if ((PRI1 == none) || (PRI1 != none && P.PlayerReplicationInfo != PRI1)) {
+        if (default.Announcer != none) {
+            if (TeamInfo(O) != none)
+                default.Announcer.Announce(ID, TeamInfo(O).TeamIndex);
+            else
+                default.Announcer.Announce(ID);
+        }
     }
 }
 

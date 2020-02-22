@@ -32,14 +32,21 @@ var() sound GotFlag[4];
 
 // Internal variables to make announcements overlap less
 struct Announcement {
-    byte AnnID;
-    byte Team;
+    var byte AnnID;
+    var byte Team;
+};
+
+struct AnnouncementContent {
+    var sound Sound[4];
+    var float Volume[4];
+    var float MinPlayTime;
 };
 
 var PlayerPawn LocalPlayer;
 var Announcement AnnouncementQueue[16]; // QueueSize
 var bool AnnouncementPlaying;
 var float AnnouncerVolume;
+var AnnouncementContent Test;
 
 function sound GetAnnouncementSound(byte Ann, optional byte Team, optional int Slot) {
     switch (Ann) {
@@ -101,7 +108,7 @@ event Timer() {
 
         for (i = 0; i < QueueSize - 1; i++) {
             AnnouncementQueue[i] = AnnouncementQueue[i + 1];
-            if (AnnouncementQueue[i].S == none) return;
+            if (AnnouncementQueue[i].AnnID == 0) return;
         }
 
         AnnouncementQueue[QueueSize - 1].AnnID = 0;
@@ -162,8 +169,8 @@ defaultproperties {
     FlagReturned(1)=sound'NewCTF.BlueFlagReturned'
     FlagReturned(2)=none
     FlagReturned(3)=none
-    FlagReturned(4)=Sound'Botpack.CTF.ReturnSound'
-    FlagReturned(5)=Sound'Botpack.CTF.ReturnSound'
+    FlagReturned(4)=sound'Botpack.CTF.ReturnSound'
+    FlagReturned(5)=sound'Botpack.CTF.ReturnSound'
     FlagReturned(6)=sound'Botpack.CTF.ReturnSound'
     FlagReturned(7)=sound'Botpack.CTF.ReturnSound'
 
@@ -182,11 +189,12 @@ defaultproperties {
     FlagScored(3)=none
     FlagScored(4)=sound'Botpack.CTF.CaptureSound2'
     FlagScored(5)=sound'Botpack.CTF.CaptureSound3'
-    FlagScored(6)=Sound'Botpack.CTF.CaptureSound2'
+    FlagScored(6)=sound'Botpack.CTF.CaptureSound2'
     FlagScored(7)=sound'Botpack.CTF.CaptureSound3'
 
     Overtime=sound'NewCTF.Overtime'
     AdvantageGeneric=sound'NewCTF.AdvantageGeneric'
     Draw=sound'NewCTF.Draw'
     GotFlag=sound'NewCTF.GotFlag'
+    Test=(sound(0)=sound'NewCTF.RedFlagTaken',Volume(0)=16,MinPlayTime=1)
 }

@@ -5,6 +5,7 @@ var(Announcer)   config bool   bEnabled;
 var(Announcer)   config float  AnnouncerVolume;
 var(Announcer)   config string CTFAnnouncerClass;
 var NewCTFAnnouncer Announcer;
+var bool bNoAnnouncer;
 
 static function ClientReceive(
 	PlayerPawn P,
@@ -16,7 +17,7 @@ static function ClientReceive(
     local sound S;
     local class<NewCTFAnnouncer> C;
 
-    if (default.bEnabled == false) return;
+    if (default.bEnabled == false || default.bNoAnnouncer) return;
 
     if (default.Announcer == none) {
         C = class<NewCTFAnnouncer>(DynamicLoadObject(default.CTFAnnouncerClass, class'class'));
@@ -25,6 +26,10 @@ static function ClientReceive(
             default.Announcer.LocalPlayer = P;
             default.Announcer.AnnouncerVolume = default.AnnouncerVolume;
         }
+
+        // Avoid trying to load an invalid class multiple times
+        if (C == none || default.Announcer == none)
+            default.bNoAnnouncer = true;
     }
 
     if ((PRI1 == none) || (PRI1 != none && P.PlayerReplicationInfo != PRI1)) {
@@ -41,4 +46,6 @@ defaultproperties {
     bEnabled=True
     AnnouncerVolume=16.0
     CTFAnnouncerClass="NewCTF.NewCTFAnnouncer"
+
+    bNoAnnouncer=False
 }

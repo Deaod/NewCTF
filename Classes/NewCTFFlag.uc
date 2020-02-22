@@ -1,5 +1,35 @@
 class NewCTFFlag extends CTFFlag;
 
+function SendHome() {
+    if (Holder == none) {
+        BroadcastLocalizedMessage(
+            class'NewCTFMessages',
+            2, // FlagReturned
+            none,
+            none,
+            CTFGame(Level.Game).Teams[Team]
+        );
+    }
+
+    super.SendHome();
+}
+
+function Drop(vector newVel) {
+    if (   (Holder.Region.Zone.bPainZone && (Holder.Region.Zone.DamagePerSec > 0)) == false
+        && (Holder.FootRegion.Zone.bPainZone && (Holder.FootRegion.Zone.DamagePerSec > 0)) == false
+    ) {
+        BroadcastLocalizedMessage(
+            class'NewCTFMessages',
+            1, // FlagDropped
+            none,
+            none,
+            CTFGame(Level.Game).Teams[Team]
+        );
+    }
+
+    super.Drop(newVel);
+}
+
 state Held {
     function BeginState() {
         super.BeginState();
@@ -16,43 +46,6 @@ state Held {
             class'NewCTFMessages',
             8, // YouHaveTheFlag
         );
-    }
-}
-
-state Dropped {
-    function BeginState() {
-        super.BeginState();
-
-        BroadcastLocalizedMessage(
-            class'NewCTFMessages',
-            1, // FlagDropped
-            none,
-            none,
-            CTFGame(Level.Game).Teams[Team]
-        );
-    }
-
-    function Touch(Actor Other)
-    {
-        local Pawn aPawn;
-
-        super.Touch(Other);
-
-        aPawn = Pawn(Other);
-        if (   aPawn != None
-            && aPawn.bIsPlayer
-            && aPawn.Health > 0
-            && aPawn.IsInState('FeigningDeath') == false
-            && aPawn.PlayerReplicationInfo.Team == Team
-        ) {
-            BroadcastLocalizedMessage(
-                class'NewCTFMessages',
-                2, // FlagReturned
-                none,
-                none,
-                CTFGame(Level.Game).Teams[Team]
-            );
-        }
     }
 }
 

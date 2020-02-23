@@ -20,6 +20,8 @@ static function ClientReceive(
     if (default.bEnabled == false || default.bNoAnnouncer) return;
 
     if (default.Announcer == none) {
+        StaticSaveConfig(); // create default configuration in User.ini
+
         C = class<NewCTFAnnouncer>(DynamicLoadObject(default.CTFAnnouncerClass, class'class'));
         if (C != none) {
             default.Announcer = P.Spawn(C);

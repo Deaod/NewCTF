@@ -247,6 +247,7 @@ function PlayerPawn GetLocalPlayer() {
 
 defaultproperties
 {
+    DrawType=DT_None
     RemoteRole=ROLE_None
     AnnouncementPlaying=false
 }

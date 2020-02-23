@@ -1,14 +1,20 @@
 class NewCTFFlag extends CTFFlag;
 
 function SendHome() {
-    if (Holder == none) {
-        BroadcastLocalizedMessage(
-            class'NewCTFMessages',
-            2, // FlagReturned
-            none,
-            none,
-            CTFGame(Level.Game).Teams[Team]
-        );
+    local DeathMatchPlus G;
+
+    G = DeathMatchPlus(Level.Game);
+
+    if ((G != none) && G.bNetReady == false && (G.bRequireReady == false || (G.CountDown <= 0))) {
+        if (Holder == none) {
+            BroadcastLocalizedMessage(
+                class'NewCTFMessages',
+                2, // FlagReturned
+                none,
+                none,
+                CTFGame(Level.Game).Teams[Team]
+            );
+        }
     }
 
     super.SendHome();

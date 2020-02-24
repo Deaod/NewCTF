@@ -47,7 +47,7 @@ static function ClientReceive(
 defaultproperties {
     bEnabled=True
     AnnouncerVolume=50.0
-    CTFAnnouncerClass="NewCTF.NewCTFAnnouncer"
+    CTFAnnouncerClass="NewCTF.DefaultAnnouncer"
 
     bNoAnnouncer=False
 }

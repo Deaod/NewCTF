@@ -1,5 +1,7 @@
 class DefaultAnnouncer extends NewCTFAnnouncer;
 
+#exec AUDIO IMPORT FILE="Sounds/flagtaken.wav" name="FlagTaken"
+
 event Spawned() {
     FlagReturned[0].Snd[0] = sound'Botpack.CTF.ReturnSound';
     FlagReturned[0].Duration = 0;
@@ -10,16 +12,16 @@ event Spawned() {
     FlagReturned[3].Snd[0] = sound'Botpack.CTF.ReturnSound';
     FlagReturned[3].Duration = 0;
 
-    FlagTaken[0].Snd[1] = sound'Botpack.CTF.flagtaken';
+    FlagTaken[0].Snd[1] = sound'NewCTF.FlagTaken';
     FlagTaken[0].Cond[1] = ANNC_Team;
     FlagTaken[0].Duration = 0;
-    FlagTaken[1].Snd[1] = sound'Botpack.CTF.flagtaken';
+    FlagTaken[1].Snd[1] = sound'NewCTF.FlagTaken';
     FlagTaken[1].Cond[1] = ANNC_Team;
     FlagTaken[1].Duration = 0;
-    FlagTaken[2].Snd[1] = sound'Botpack.CTF.flagtaken';
+    FlagTaken[2].Snd[1] = sound'NewCTF.FlagTaken';
     FlagTaken[2].Cond[1] = ANNC_Team;
     FlagTaken[2].Duration = 0;
-    FlagTaken[3].Snd[1] = sound'Botpack.CTF.flagtaken';
+    FlagTaken[3].Snd[1] = sound'NewCTF.FlagTaken';
     FlagTaken[3].Cond[1] = ANNC_Team;
     FlagTaken[3].Duration = 0;
 

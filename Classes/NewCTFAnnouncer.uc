@@ -202,7 +202,7 @@ event Timer() {
 
         AnnouncementQueue[QueueSize - 1].AnnID = 0;
         AnnouncementQueue[QueueSize - 1].Team = 0;
-    } until(duration > 0);
+    } until(duration > 0 || AnnouncementQueue[0].AnnID == 0);
 
     SetTimer(duration, false);
 }

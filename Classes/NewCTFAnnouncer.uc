@@ -88,9 +88,9 @@ function AnnouncementContent GetAnnouncementContent(byte Ann, optional byte Team
 
 event Spawned() {
     FlagDropped[0].Snd[0] = sound'NewCTF.RedFlagDropped';
-    FlagDropped[0].Duration = GetSoundDuration(FlagDropped[0].Snd[0]);
+    FlagDropped[0].Duration = 0;
     FlagDropped[1].Snd[0] = sound'NewCTF.BlueFlagDropped';
-    FlagDropped[1].Duration = GetSoundDuration(FlagDropped[1].Snd[0]);
+    FlagDropped[1].Duration = 0;
     FlagDropped[2].Snd[0] = none;
     FlagDropped[2].Duration = 0;
     FlagDropped[3].Snd[0] = none;
@@ -98,10 +98,10 @@ event Spawned() {
 
     FlagReturned[0].Snd[0] = sound'NewCTF.RedFlagReturned';
     FlagReturned[0].Snd[1] = sound'Botpack.CTF.ReturnSound';
-    FlagReturned[0].Duration = GetSoundDuration(FlagReturned[0].Snd[0]);
+    FlagReturned[0].Duration = 0;
     FlagReturned[1].Snd[0] = sound'NewCTF.BlueFlagReturned';
     FlagReturned[1].Snd[1] = sound'Botpack.CTF.ReturnSound';
-    FlagReturned[1].Duration = GetSoundDuration(FlagReturned[1].Snd[0]);
+    FlagReturned[1].Duration = 0;
     FlagReturned[2].Snd[0] = none;
     FlagReturned[2].Snd[1] = sound'Botpack.CTF.ReturnSound';
     FlagReturned[2].Duration = 0;
@@ -112,11 +112,11 @@ event Spawned() {
     FlagTaken[0].Snd[0] = sound'NewCTF.RedFlagTaken';
     FlagTaken[0].Snd[1] = sound'NewCTF.FlagAlarm';
     FlagTaken[0].Cond[1] = ANNC_Team;
-    FlagTaken[0].Duration = GetSoundDuration(FlagTaken[0].Snd[0]);
+    FlagTaken[0].Duration = 0;
     FlagTaken[1].Snd[0] = sound'NewCTF.BlueFlagTaken';
     FlagTaken[1].Snd[1] = sound'NewCTF.FlagAlarm';
     FlagTaken[1].Cond[1] = ANNC_Team;
-    FlagTaken[1].Duration = GetSoundDuration(FlagTaken[1].Snd[0]);
+    FlagTaken[1].Duration = 0;
     FlagTaken[2].Snd[0] = none;
     FlagTaken[2].Snd[1] = sound'NewCTF.FlagAlarm';
     FlagTaken[2].Cond[1] = ANNC_Team;
@@ -128,10 +128,10 @@ event Spawned() {
 
     FlagScored[0].Snd[0] = sound'NewCTF.RedTeamScores';
     FlagScored[0].Snd[1] = sound'Botpack.CTF.CaptureSound2';
-    FlagScored[0].Duration = GetSoundDuration(FlagScored[0].Snd[0]);
+    FlagScored[0].Duration = 0;
     FlagScored[1].Snd[0] = sound'NewCTF.BlueTeamScores';
     FlagScored[1].Snd[1] = sound'Botpack.CTF.CaptureSound3';
-    FlagScored[1].Duration = GetSoundDuration(FlagScored[1].Snd[0]);
+    FlagScored[1].Duration = 0;
     FlagScored[2].Snd[0] = none;
     FlagScored[2].Snd[1] = sound'Botpack.CTF.CaptureSound2';
     FlagScored[2].Duration = 0;
@@ -140,13 +140,13 @@ event Spawned() {
     FlagScored[3].Duration = 0;
 
     Overtime.Snd[0]           = sound'NewCTF.Overtime';
-    Overtime.Duration         = GetSoundDuration(Overtime.Snd[0]);
+    Overtime.Duration         = 0;
     AdvantageGeneric.Snd[0]   = sound'NewCTF.AdvantageGeneric';
-    AdvantageGeneric.Duration = GetSoundDuration(AdvantageGeneric.Snd[0]);
+    AdvantageGeneric.Duration = 0;
     Draw.Snd[0]               = sound'NewCTF.Draw';
-    Draw.Duration             = GetSoundDuration(Draw.Snd[0]);
+    Draw.Duration             = 0;
     GotFlag.Snd[0]            = sound'NewCTF.GotFlag';
-    GotFlag.Duration          = GetSoundDuration(GotFlag.Snd[0]);
+    GotFlag.Duration          = 0;
 }
 
 function bool CanPlayAnnouncement(PlayerPawn P, byte Team, AnnouncementCondition ACond) {

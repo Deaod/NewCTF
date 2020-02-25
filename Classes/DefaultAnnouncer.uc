@@ -26,18 +26,20 @@ event Spawned() {
     FlagTaken[3].Duration = 0;
 
     FlagScored[0].Snd[0] = sound'Botpack.CTF.CaptureSound2';
-    FlagScored[0].Duration = GetSoundDuration(FlagScored[0].Snd[0]);
+    FlagScored[0].Duration = 0;
     FlagScored[1].Snd[0] = sound'Botpack.CTF.CaptureSound3';
-    FlagScored[1].Duration = GetSoundDuration(FlagScored[1].Snd[0]);
+    FlagScored[1].Duration = 0;
     FlagScored[2].Snd[0] = sound'Botpack.CTF.CaptureSound2';
     FlagScored[2].Duration = 0;
     FlagScored[3].Snd[0] = sound'Botpack.CTF.CaptureSound3';
     FlagScored[3].Duration = 0;
 
     Overtime.Snd[0]           = sound'NewCTF.Overtime';
-    Overtime.Duration         = GetSoundDuration(Overtime.Snd[0]);
+    Overtime.Duration         = 0;
     AdvantageGeneric.Snd[0]   = sound'NewCTF.AdvantageGeneric';
-    AdvantageGeneric.Duration = GetSoundDuration(AdvantageGeneric.Snd[0]);
+    AdvantageGeneric.Duration = 0;
     Draw.Snd[0]               = sound'NewCTF.Draw';
-    Draw.Duration             = GetSoundDuration(Draw.Snd[0]);
+    Draw.Duration             = 0;
+    GotFlag.Snd[0]            = sound'NewCTF.GotFlag';
+    GotFlag.Duration          = 0;
 }

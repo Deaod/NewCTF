@@ -165,6 +165,38 @@ function bool CanPlayAnnouncement(PlayerPawn P, byte Team, AnnouncementCondition
     return true;
 }
 
+function PlayAnnouncementSound(PlayerPawn P, sound ASound, float Loudness, optional bool bInterrupt, optional bool bVolumeControl )
+{
+    local actor SoundPlayer;
+    local int Volume;
+    local TournamentPlayer TP;
+    local int nbrPlays;
+    local float volPerPlay;
+
+    TP = TournamentPlayer(P);
+
+    if (TP != none) {
+        if (TP.b3DSound)
+            Volume = Clamp(TP.AnnouncerVolume, 0, 1);
+        else if (bVolumeControl)
+            Volume = Clamp(TP.AnnouncerVolume, 0, 4);
+    } else {
+        Volume = 4;
+    }
+
+    if (P.ViewTarget != none)
+        SoundPlayer = P.ViewTarget;
+    else
+        SoundPlayer = P;
+
+    if (Volume > 0) {
+        nbrPlays = 1 + int(Loudness);
+        volPerPlay = Loudness / nbrPlays;
+        for (nbrPlays = nbrPlays; nbrPlays > 0; nbrPlays--)
+            SoundPlayer.PlayOwnedSound(ASound, SLOT_None, volPerPlay, bInterrupt);
+    }
+}
+
 // Returns the longest duration of all sounds associated with the announcement
 function float PlayAnnouncement(byte A, byte Team) {
     local PlayerPawn P;
@@ -178,7 +210,7 @@ function float PlayAnnouncement(byte A, byte Team) {
     for (slot = 0; slot < MaxSlots; slot++) {
         if (AC.Snd[slot] == none || AC.VolAdj[slot] <= -1.0) continue;
         if (CanPlayAnnouncement(P, Team, AC.Cond[slot]) == false) continue;
-        P.PlayOwnedSound(AC.Snd[slot], SLOT_None, AnnouncerVolume * (1.0 + AC.VolAdj[slot]), false);
+        PlayAnnouncementSound(P, AC.Snd[slot], AnnouncerVolume * (1.0 + AC.VolAdj[slot]), false, true);
     }
 
     return AC.Duration;

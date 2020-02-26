@@ -190,7 +190,7 @@ function PlayAnnouncementSound(PlayerPawn P, sound ASound, float Loudness, optio
         SoundPlayer = P;
 
     if (Volume > 0) {
-        nbrPlays = 1 + int(Loudness);
+        nbrPlays = int(Loudness + 0.99999);
         volPerPlay = Loudness / nbrPlays;
         for (nbrPlays = nbrPlays; nbrPlays > 0; nbrPlays--)
             SoundPlayer.PlayOwnedSound(ASound, SLOT_None, volPerPlay, bInterrupt);

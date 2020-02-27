@@ -29,13 +29,27 @@ enum AnnouncementCondition {
     ANNC_NotTeam
 };
 
+enum AnnouncementSection {
+    // Play on General
+    ANNS_General,
+    // Play on Team-specific
+    ANNS_Team
+};
+
+struct AnnouncementSlot {
+    // The sounds to play
+    var() sound Snd;
+    //
+    var() AnnouncementCondition Cond;
+    // The volume individual sounds play at is AnnouncerVolume * (1 + VolAdj) for each sound
+    var() float VolAdj;
+    //
+    var() AnnouncementSection Section;
+};
+
 struct AnnouncementContent {
     // The sounds to play
-    var() sound Snd[4];
-    //
-    var() AnnouncementCondition Cond[4];
-    // The volume individual sounds play at is AnnouncerVolume * (1 + VolAdj) for each sound
-    var() float VolAdj[4];
+    var() AnnouncementSlot Slots[4]; // MaxSlots
     // This is the length of time where this announcement plays without any other announcements
     var() float Duration;
 };
@@ -50,6 +64,11 @@ var() AnnouncementContent AdvantageGeneric;
 var() AnnouncementContent Draw;
 var() AnnouncementContent GotFlag;
 
+// These are built-in sounds
+var() sound FlagAlarmSound[4];
+var() sound FlagReturnSound;
+var() sound FlagCaptureSound[4];
+
 // Internal variables to make announcements overlap less
 struct Announcement {
     var byte AnnID;
@@ -58,6 +77,8 @@ struct Announcement {
 
 var PlayerPawn LocalPlayer;
 var Announcement AnnouncementQueue[16]; // QueueSize
+var AnnouncementPlayer Team[4];
+var AnnouncementPlayer General;
 var bool AnnouncementPlaying;
 var float AnnouncerVolume;
 
@@ -87,86 +108,105 @@ function AnnouncementContent GetAnnouncementContent(byte Ann, optional byte Team
 }
 
 event Spawned() {
-    FlagDropped[0].Snd[0] = sound'NewCTF.RedFlagDropped';
+    FlagDropped[0].Slots[0].Snd = sound'NewCTF.RedFlagDropped';
+    FlagDropped[0].Slots[0].Section = ANNS_Team;
     FlagDropped[0].Duration = 0;
-    FlagDropped[1].Snd[0] = sound'NewCTF.BlueFlagDropped';
+    FlagDropped[1].Slots[0].Snd = sound'NewCTF.BlueFlagDropped';
+    FlagDropped[1].Slots[0].Section = ANNS_Team;
     FlagDropped[1].Duration = 0;
-    FlagDropped[2].Snd[0] = none;
-    FlagDropped[2].Duration = 0;
-    FlagDropped[3].Snd[0] = none;
-    FlagDropped[3].Duration = 0;
 
-    FlagReturned[0].Snd[0] = sound'NewCTF.RedFlagReturned';
-    FlagReturned[0].Snd[1] = sound'Botpack.CTF.ReturnSound';
+    FlagReturned[0].Slots[0].Snd = sound'NewCTF.RedFlagReturned';
+    FlagReturned[0].Slots[0].Section = ANNS_Team;
     FlagReturned[0].Duration = 0;
-    FlagReturned[1].Snd[0] = sound'NewCTF.BlueFlagReturned';
-    FlagReturned[1].Snd[1] = sound'Botpack.CTF.ReturnSound';
+    FlagReturned[1].Slots[0].Snd = sound'NewCTF.BlueFlagReturned';
+    FlagReturned[1].Slots[0].Section = ANNS_Team;
     FlagReturned[1].Duration = 0;
-    FlagReturned[2].Snd[0] = none;
-    FlagReturned[2].Snd[1] = sound'Botpack.CTF.ReturnSound';
-    FlagReturned[2].Duration = 0;
-    FlagReturned[3].Snd[0] = none;
-    FlagReturned[3].Snd[1] = sound'Botpack.CTF.ReturnSound';
-    FlagReturned[3].Duration = 0;
 
-    FlagTaken[0].Snd[0] = sound'NewCTF.RedFlagTaken';
-    FlagTaken[0].Snd[1] = sound'NewCTF.FlagAlarm';
-    FlagTaken[0].Cond[1] = ANNC_Team;
+    FlagTaken[0].Slots[0].Snd = sound'NewCTF.RedFlagTaken';
+    FlagTaken[0].Slots[0].Section = ANNS_Team;
     FlagTaken[0].Duration = 0;
-    FlagTaken[1].Snd[0] = sound'NewCTF.BlueFlagTaken';
-    FlagTaken[1].Snd[1] = sound'NewCTF.FlagAlarm';
-    FlagTaken[1].Cond[1] = ANNC_Team;
+    FlagTaken[1].Slots[0].Snd = sound'NewCTF.BlueFlagTaken';
+    FlagTaken[1].Slots[0].Section = ANNS_Team;
     FlagTaken[1].Duration = 0;
-    FlagTaken[2].Snd[0] = none;
-    FlagTaken[2].Snd[1] = sound'NewCTF.FlagAlarm';
-    FlagTaken[2].Cond[1] = ANNC_Team;
-    FlagTaken[2].Duration = 0;
-    FlagTaken[3].Snd[0] = none;
-    FlagTaken[3].Snd[1] = sound'NewCTF.FlagAlarm';
-    FlagTaken[3].Cond[1] = ANNC_Team;
-    FlagTaken[3].Duration = 0;
 
-    FlagScored[0].Snd[0] = sound'NewCTF.RedTeamScores';
-    FlagScored[0].Snd[1] = sound'Botpack.CTF.CaptureSound2';
+    FlagScored[0].Slots[0].Snd = sound'NewCTF.RedTeamScores';
+    FlagScored[0].Slots[0].Section = ANNS_Team;
     FlagScored[0].Duration = 0;
-    FlagScored[1].Snd[0] = sound'NewCTF.BlueTeamScores';
-    FlagScored[1].Snd[1] = sound'Botpack.CTF.CaptureSound3';
+    FlagScored[1].Slots[0].Snd = sound'NewCTF.BlueTeamScores';
+    FlagScored[1].Slots[0].Section = ANNS_Team;
     FlagScored[1].Duration = 0;
-    FlagScored[2].Snd[0] = none;
-    FlagScored[2].Snd[1] = sound'Botpack.CTF.CaptureSound2';
-    FlagScored[2].Duration = 0;
-    FlagScored[3].Snd[0] = none;
-    FlagScored[3].Snd[1] = sound'Botpack.CTF.CaptureSound3';
-    FlagScored[3].Duration = 0;
 
-    Overtime.Snd[0]           = sound'NewCTF.Overtime';
-    Overtime.Duration         = 0;
-    AdvantageGeneric.Snd[0]   = sound'NewCTF.AdvantageGeneric';
+    Overtime.Slots[0].Snd = sound'NewCTF.Overtime';
+    Overtime.Duration = 0;
+    AdvantageGeneric.Slots[0].Snd = sound'NewCTF.AdvantageGeneric';
     AdvantageGeneric.Duration = 0;
-    Draw.Snd[0]               = sound'NewCTF.Draw';
-    Draw.Duration             = 0;
-    GotFlag.Snd[0]            = sound'NewCTF.GotFlag';
-    GotFlag.Duration          = 0;
+    Draw.Slots[0].Snd = sound'NewCTF.Draw';
+    Draw.Duration = 0;
+    GotFlag.Slots[0].Snd = sound'NewCTF.GotFlag';
+    GotFlag.Duration = 0;
+
+    FlagAlarmSound[0] = sound'NewCTF.FlagAlarm';
+    FlagAlarmSound[1] = sound'NewCTF.FlagAlarm';
+    FlagAlarmSound[2] = sound'NewCTF.FlagAlarm';
+    FlagAlarmSound[3] = sound'NewCTF.FlagAlarm';
+}
+
+function InitSections() {
+    local PlayerPawn P;
+    local int i;
+    P = GetLocalPlayer();
+
+    if (P == none) return;
+
+    General = P.Spawn(class'NewCTF.AnnouncementPlayer', P);
+
+    for (i = 0; i < MaxNumTeams; i++) {
+        Team[i] = P.Spawn(class'NewCTF.AnnouncementPlayer', P);
+    }
+}
+
+function ReplaceDefaultSound() {
+    local FlagBase FB;
+    local int i;
+
+    foreach AllActors(class'FlagBase', FB)
+        if (FlagAlarmSound[FB.Team] != none)
+            FB.TakenSound = FlagAlarmSound[FB.Team];
+
+    if (FlagReturnSound != none)
+        CTFGame(Level.Game).ReturnSound = FlagReturnSound;
+
+    for (i = 0; i < MaxNumTeams; i++)
+        if (FlagCaptureSound[i] != none)
+            CTFGame(Level.Game).CaptureSound[i] = FlagCaptureSound[i];
+}
+
+function InitAnnouncer() {
+    InitSections();
 }
 
 function bool CanPlayAnnouncement(PlayerPawn P, byte Team, AnnouncementCondition ACond) {
     switch (ACond) {
         case ANNC_All:
-            break;
+            return true;
 
         case ANNC_Team:
-            if (P.PlayerReplicationInfo.Team != Team) return false;
-            break;
+            return (P.PlayerReplicationInfo.Team == Team);
 
         case ANNC_NotTeam:
-            if (P.PlayerReplicationInfo.Team == Team) return false;
-            break;
+            return (P.PlayerReplicationInfo.Team != Team);
     }
     return true;
 }
 
-function PlayAnnouncementSound(PlayerPawn P, sound ASound, float Loudness, optional bool bInterrupt, optional bool bVolumeControl )
-{
+function PlayAnnouncementSound(
+    AnnouncementPlayer AP,
+    PlayerPawn P,
+    sound ASound,
+    float Loudness,
+    optional bool bInterrupt,
+    optional bool bVolumeControl
+) {
     local actor SoundPlayer;
     local int Volume;
     local TournamentPlayer TP;
@@ -189,18 +229,37 @@ function PlayAnnouncementSound(PlayerPawn P, sound ASound, float Loudness, optio
     else
         SoundPlayer = P;
 
-    if (Volume > 0) {
-        nbrPlays = int(Loudness + 0.99999);
+    if (Volume > 0 && AP != none) {
+        nbrPlays = Clamp(int(Loudness + 0.99999), 0, 4);
         volPerPlay = Loudness / nbrPlays;
-        for (nbrPlays = nbrPlays; nbrPlays > 0; nbrPlays--)
-            SoundPlayer.PlayOwnedSound(ASound, SLOT_None, volPerPlay, bInterrupt);
+        switch(nbrPlays) {
+            // commented out to avoid blowing eardrums
+            //case 6: AP.PlayOwnedSound(ASound, SLOT_Ambient, volPerPlay, bInterrupt);
+            //case 5: AP.PlayOwnedSound(ASound, SLOT_Interact, volPerPlay, bInterrupt);
+            case 4: AP.PlayOwnedSound(ASound, SLOT_Pain, volPerPlay, bInterrupt);
+            case 3: AP.PlayOwnedSound(ASound, SLOT_Talk, volPerPlay, bInterrupt);
+            case 2: AP.PlayOwnedSound(ASound, SLOT_Misc, volPerPlay, bInterrupt);
+            case 1: AP.PlayOwnedSound(ASound, SLOT_Interface, volPerPlay, bInterrupt);
+        }
     }
+}
+
+function AnnouncementPlayer GetAnnouncementPlayer(AnnouncementSection AS, byte T) {
+    switch(AS) {
+        case ANNS_General:
+            return General;
+        case ANNS_Team:
+            return Team[T];
+    }
+    return none;
 }
 
 // Returns the longest duration of all sounds associated with the announcement
 function float PlayAnnouncement(byte A, byte Team) {
     local PlayerPawn P;
     local AnnouncementContent AC;
+    local AnnouncementSlot AS;
+    local AnnouncementPlayer AP;
     local int slot;
 
     P = GetLocalPlayer();
@@ -208,9 +267,12 @@ function float PlayAnnouncement(byte A, byte Team) {
 
     AC = GetAnnouncementContent(A, Team);
     for (slot = 0; slot < MaxSlots; slot++) {
-        if (AC.Snd[slot] == none || AC.VolAdj[slot] <= -1.0) continue;
-        if (CanPlayAnnouncement(P, Team, AC.Cond[slot]) == false) continue;
-        PlayAnnouncementSound(P, AC.Snd[slot], AnnouncerVolume * (1.0 + AC.VolAdj[slot]), false, true);
+        AS = AC.Slots[slot];
+        if (AS.Snd == none || AS.VolAdj <= -1.0) continue;
+        AP = GetAnnouncementPlayer(AS.Section, Team);
+        if (AP == none) continue;
+        if (CanPlayAnnouncement(P, Team, AS.Cond) == false) continue;
+        PlayAnnouncementSound(GetAnnouncementPlayer(AS.Section, Team),P, AS.Snd, AnnouncerVolume * (1.0 + AS.VolAdj), false, true);
     }
 
     return AC.Duration;

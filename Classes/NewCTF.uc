@@ -84,6 +84,7 @@ function InitFlags() {
     local NewCTFFlag F;
     local CTFFlag oldF;
     local CTFReplicationInfo ctfState;
+    local sound FBAlarm;
 
     ctfState = CTFReplicationInfo(GameReplicationInfo);
     foreach AllActors(class'FlagBase', FB)
@@ -94,6 +95,7 @@ function InitFlags() {
         // Since actors are destroyed at the end of a frame, we have to get
         // tricky to work around this.
 
+        FBAlarm = FB.TakenSound;
         FB.TakenSound = none; // first, make sure we dont get annoying sounds
 
         oldF = ctfState.FlagList[FB.Team];
@@ -102,6 +104,7 @@ function InitFlags() {
         oldF.Destroy(); // now we can safetly destroy the old flag
 
         FB.bHidden = false; // fix the FlagBase
+        FB.TakenSound = FBAlarm;
 
         F = FB.Spawn(class'NewCTFFlag');
         F.HomeBase = FB;
@@ -133,6 +136,10 @@ function PostBeginPlay() {
     super.PostBeginPlay();
     InitSpawnSystem();
     InitFlags();
+}
+
+simulated event PostNetBeginPlay() {
+    class'NewCTFMessages'.static.InitAnnouncements(self);
 }
 
 // Returns the best team by score, or None if at least two teams are tied for first
@@ -370,11 +377,6 @@ defaultproperties
      bAllowOvertime=False
      AdvantageDuration=60
 
-     CaptureSound(0)=none
-     CaptureSound(1)=none
-     CaptureSound(2)=none
-     CaptureSound(3)=none
-     ReturnSound=none
      BeaconName="NCTF"
      GameName="New Capture the Flag"
 }

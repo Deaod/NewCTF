@@ -64,11 +64,6 @@ var() AnnouncementContent AdvantageGeneric;
 var() AnnouncementContent Draw;
 var() AnnouncementContent GotFlag;
 
-// These are built-in sounds
-var() sound FlagAlarmSound[4];
-var() sound FlagReturnSound;
-var() sound FlagCaptureSound[4];
-
 // Internal variables to make announcements overlap less
 struct Announcement {
     var byte AnnID;
@@ -144,11 +139,6 @@ event Spawned() {
     Draw.Duration = 0;
     GotFlag.Slots[0].Snd = sound'NewCTF.GotFlag';
     GotFlag.Duration = 0;
-
-    FlagAlarmSound[0] = sound'NewCTF.FlagAlarm';
-    FlagAlarmSound[1] = sound'NewCTF.FlagAlarm';
-    FlagAlarmSound[2] = sound'NewCTF.FlagAlarm';
-    FlagAlarmSound[3] = sound'NewCTF.FlagAlarm';
 }
 
 function InitSections() {
@@ -163,22 +153,6 @@ function InitSections() {
     for (i = 0; i < MaxNumTeams; i++) {
         Team[i] = P.Spawn(class'NewCTF.AnnouncementPlayer', P);
     }
-}
-
-function ReplaceDefaultSound() {
-    local FlagBase FB;
-    local int i;
-
-    foreach AllActors(class'FlagBase', FB)
-        if (FlagAlarmSound[FB.Team] != none)
-            FB.TakenSound = FlagAlarmSound[FB.Team];
-
-    if (FlagReturnSound != none)
-        CTFGame(Level.Game).ReturnSound = FlagReturnSound;
-
-    for (i = 0; i < MaxNumTeams; i++)
-        if (FlagCaptureSound[i] != none)
-            CTFGame(Level.Game).CaptureSound[i] = FlagCaptureSound[i];
 }
 
 function InitAnnouncer() {
@@ -272,7 +246,7 @@ function float PlayAnnouncement(byte A, byte Team) {
         AP = GetAnnouncementPlayer(AS.Section, Team);
         if (AP == none) continue;
         if (CanPlayAnnouncement(P, Team, AS.Cond) == false) continue;
-        PlayAnnouncementSound(GetAnnouncementPlayer(AS.Section, Team),P, AS.Snd, AnnouncerVolume * (1.0 + AS.VolAdj), false, true);
+        PlayAnnouncementSound(AP, P, AS.Snd, AnnouncerVolume * (1.0 + AS.VolAdj), false, true);
     }
 
     return AC.Duration;

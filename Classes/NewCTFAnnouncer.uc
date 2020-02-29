@@ -204,12 +204,11 @@ function PlayAnnouncementSound(
         SoundPlayer = P;
 
     if (Volume > 0 && AP != none) {
-        nbrPlays = Clamp(int(Loudness + 0.99999), 0, 4);
+        nbrPlays = Clamp(int(Loudness + 0.99999), 0, 6);
         volPerPlay = Loudness / nbrPlays;
         switch(nbrPlays) {
-            // commented out to avoid blowing eardrums
-            //case 6: AP.PlayOwnedSound(ASound, SLOT_Ambient, volPerPlay, bInterrupt);
-            //case 5: AP.PlayOwnedSound(ASound, SLOT_Interact, volPerPlay, bInterrupt);
+            case 6: AP.PlayOwnedSound(ASound, SLOT_Ambient, volPerPlay, bInterrupt);
+            case 5: AP.PlayOwnedSound(ASound, SLOT_Interact, volPerPlay, bInterrupt);
             case 4: AP.PlayOwnedSound(ASound, SLOT_Pain, volPerPlay, bInterrupt);
             case 3: AP.PlayOwnedSound(ASound, SLOT_Talk, volPerPlay, bInterrupt);
             case 2: AP.PlayOwnedSound(ASound, SLOT_Misc, volPerPlay, bInterrupt);

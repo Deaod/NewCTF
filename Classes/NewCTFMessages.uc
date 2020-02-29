@@ -36,7 +36,7 @@ static function UpgradeConfiguration() {
         // all cases should fall through
         switch(default._Version) {
             case 0:
-                if (default.AnnouncerVolume > 4)
+                if (default.AnnouncerVolume > 6)
                     default.AnnouncerVolume = 1.5;
         }
 

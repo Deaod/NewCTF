@@ -20,6 +20,7 @@ var(SpawnSystem) config float SpawnFlagBlockRange;
 // True results in default behavior, False activates an advantage system
 var(Overtime)    config bool bAllowOvertime;
 // Extra time if a flag is in play when the game ends, 0 for no limit
+// Never use the value 60, if you like the end-of-match countdown.
 var(Advantage)   config int  AdvantageDuration;
 
 var bool bAdvantage;
@@ -136,6 +137,13 @@ function PostBeginPlay() {
     super.PostBeginPlay();
     InitSpawnSystem();
     InitFlags();
+
+    if (AdvantageDuration == 60) {
+        Warn("AdvantageDuration of 60 does not trigger a countdown before advantage end.");
+        Warn("Changed AdvantageDuration to 59 as a workaround");
+        AdvantageDuration = 59;
+        SaveConfig();
+    }
 }
 
 simulated event PostNetBeginPlay() {
@@ -246,6 +254,23 @@ function EndGame(string reason) {
             bAdvantage = true;
             AdvantageCountdown = AdvantageDuration;
             RemainingTime = AdvantageDuration;
+            // Youre probably wondering why the value 60 cant be used. Well, its
+            // because of the interaction between variable replication, and how
+            // the remaining time is synchronized between server and client.
+            //
+            // See, variables are only replicated at the end of a tick, so if
+            // you change the value twice within a single tick, only the last
+            // value will be replicated. This also means that if you change the
+            // value of variable A from 'a' to 'b', then back to 'a', nothing
+            // will be replicated.
+            //
+            // Now, when EndGame is called with reason "timelimit",
+            // GRI.RemainingMinute was always 60 before entering Timer(), and
+            // is changed to 0 during Timer(), after which EndGame is called.
+            // AdvantageDuration of 60 would effectively mark
+            // GRI.RemainingMinute as unchanged, and thus unreplicated.
+            //
+            // This is why AdvantageDuration can have any value other than 60.
             GameReplicationInfo.RemainingMinute = AdvantageDuration;
             BroadcastLocalizedMessage(
                 class'NewCTFMessages',
@@ -375,7 +400,7 @@ defaultproperties
      SpawnFriendlyVisionBlockRange=150.0
      SpawnFlagBlockRange=750.0
      bAllowOvertime=False
-     AdvantageDuration=60
+     AdvantageDuration=120
 
      BeaconName="NCTF"
      GameName="New Capture the Flag"

@@ -6,6 +6,7 @@ const Version = 1;
 var(Announcer) config bool   bEnabled;
 var(Announcer) config float  AnnouncerVolume;
 var(Announcer) config string CTFAnnouncerClass;
+var(Debug)     config bool   Debug;
 var()          config int    _Version;
 var NewCTFAnnouncer Announcer;
 var bool bInitialized;
@@ -17,6 +18,7 @@ static function ClientReceive(
 	optional PlayerReplicationInfo PRI2,
 	optional Object O
 ) {
+    if (default.Debug) Log("["$P.Level.TimeSeconds$"] ClientReceive"@P@ID@PRI1@PRI2@O);
     if (default.bInitialized == false)
         InitAnnouncements(P, P);
 
@@ -32,6 +34,7 @@ static function ClientReceive(
 
 static function UpgradeConfiguration() {
     if (default._Version < Version) {
+        if (default.Debug) Log("UpgradeConfiguration from"@default._Version@"to"@Version);
         // Upgrade logic
         // all cases should fall through
         switch(default._Version) {
@@ -82,7 +85,7 @@ static function CreateAnnouncer(actor Ctx, PlayerPawn LP) {
 static function InitAnnouncements(actor Ctx, optional PlayerPawn LP) {
     if (default.bInitialized) return;
 
-    Log("InitAnnouncements");
+    if (default.Debug) Log("["$Ctx.Level.TimeSeconds$"] InitAnnouncements");
     UpgradeConfiguration();
     CreateAnnouncer(Ctx, LP);
 
@@ -94,6 +97,7 @@ defaultproperties
     bEnabled=True
     AnnouncerVolume=1.5
     CTFAnnouncerClass="NewCTF.DefaultAnnouncer"
+    Debug=False
     _Version=0
 
     bInitialized=false

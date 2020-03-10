@@ -150,6 +150,33 @@ simulated event PostNetBeginPlay() {
     class'NewCTFMessages'.static.InitAnnouncements(self);
 }
 
+function ScoreFlag(Pawn Scorer, CTFFlag F) {
+    local CTFReplicationInfo ctfState;
+    local int i;
+    local bool AllHome;
+
+    super.ScoreFlag(Scorer, F);
+
+    if (bGameEnded || bAdvantage == false) return;
+
+    ctfState = CTFReplicationInfo(GameReplicationInfo);
+    AllHome = true;
+
+    for (i = 0; i < MaxTeams; i++) {
+        if (ctfState.FlagList[i] != none && ctfState.FlagList[i].bHome == false && ctfState[i].FlagList != F) {
+            AllHome = false;
+            break;
+        }
+    }
+
+    if (AllHome) {
+        AdvantageCountdown = 0;
+        bAdvantageDone = true;
+        bAdvantage = false;
+        EndGame("timelimit");
+    }
+}
+
 // Returns the best team by score, or None if at least two teams are tied for first
 function TeamInfo GetBestTeam() {
     local int i;
@@ -232,12 +259,6 @@ function bool SetEndCams(string Reason) {
     return true;
 }
 
-function DistributeTrigger(name event, optional Actor other, optional Pawn instigator) {
-    local actor A;
-    foreach AllActors(class'Actor', A, event)
-        A.trigger(other, instigator);
-}
-
 function EndGame(string reason) {
     if (reason ~= "timelimit") {
         if (bAllowOvertime && GetBestTeam() == none) {
@@ -280,7 +301,7 @@ function EndGame(string reason) {
         }
     }
 
-    super.EndGame(reason);
+    super.EndGame(reason); // Super is DeathMatchPlus
 }
 
 function Timer() {
@@ -293,7 +314,7 @@ function Timer() {
         }
     }
 
-    Super.Timer();
+    super.Timer(); // Super is DeathMatchPlus
 
     if (bAdvantage && bAdvantageDone) {
         bAdvantage = false;

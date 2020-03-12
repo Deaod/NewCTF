@@ -422,4 +422,6 @@ defaultproperties
     SpawnFlagBlockRange=750.0
     bAllowOvertime=False
     AdvantageDuration=120
+
+    GameName="New Capture the Flag"
 }

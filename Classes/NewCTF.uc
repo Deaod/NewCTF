@@ -163,7 +163,10 @@ function ScoreFlag(Pawn Scorer, CTFFlag F) {
     AllHome = true;
 
     for (i = 0; i < MaxTeams; i++) {
-        if (ctfState.FlagList[i] != none && ctfState.FlagList[i].bHome == false && ctfState[i].FlagList != F) {
+        if (   (ctfState.FlagList[i] != none)
+            && (ctfState.FlagList[i] != F)
+            && (ctfState.FlagList[i].bHome == false))
+        {
             AllHome = false;
             break;
         }

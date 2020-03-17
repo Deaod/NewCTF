@@ -78,3 +78,8 @@ auto state Home {
         super.Touch(A);
     }
 }
+
+DefaultProperties
+{
+    bAlwaysRelevant=True
+}

@@ -392,7 +392,7 @@ function NavigationPoint FindPlayerStart(Pawn Player, optional byte InTeam, opti
                 return Tel;
     // end of copy
 
-    if (team > MaxNumTeams || NumPlayers <= SpawnSystemThreshold)
+    if (team >= MaxNumTeams || NumPlayers <= SpawnSystemThreshold)
        return super.FindPlayerStart(Player, InTeam, incomingName);
 
     psOffset = team * MaxNumSpawnPointsPerTeam;
@@ -418,11 +418,11 @@ function NavigationPoint FindPlayerStart(Pawn Player, optional byte InTeam, opti
 defaultproperties
 {
     SpawnSystemThreshold=4
-    SpawnEnemyBlockRange=750.0
-    SpawnEnemyVisionBlockRange=1500.0
+    SpawnEnemyBlockRange=500.0
+    SpawnEnemyVisionBlockRange=1000.0
     SpawnFriendlyBlockRange=150.0
     SpawnFriendlyVisionBlockRange=150.0
-    SpawnFlagBlockRange=750.0
+    SpawnFlagBlockRange=500.0
     bAllowOvertime=False
     AdvantageDuration=120
 

@@ -38,6 +38,7 @@ function Drop(vector newVel) {
 
 state Held {
     function BeginState() {
+        local Pawn P;
         super.BeginState();
 
         BroadcastLocalizedMessage(
@@ -48,9 +49,17 @@ state Held {
             CTFGame(Level.Game).Teams[Team]
         );
 
+        for(P = Level.PawnList; P != none; P = P.NextPawn)
+            if (P.PlayerReplicationInfo.Team == Team)
+                P.ReceiveLocalizedMessage(class'CTFMessage2', 1);
+
         Holder.ReceiveLocalizedMessage(
             class'NewCTFMessages',
             8, // YouHaveTheFlag
+        );
+        Holder.ReceiveLocalizedMessage(
+            class'CTFMessage2',
+            0
         );
     }
 }

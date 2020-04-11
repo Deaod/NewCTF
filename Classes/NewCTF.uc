@@ -106,6 +106,7 @@ function InitFlags() {
 
         FB.bHidden = false; // fix the FlagBase
         FB.TakenSound = FBAlarm;
+        FB.NetUpdateFrequency = 20.0;
 
         F = FB.Spawn(class'NewCTFFlag');
         F.HomeBase = FB;

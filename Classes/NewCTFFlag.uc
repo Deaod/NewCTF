@@ -2,6 +2,8 @@ class NewCTFFlag extends CTFFlag;
 
 function SendHome() {
     local DeathMatchPlus G;
+    local Pawn P;
+    local vector D;
 
     G = DeathMatchPlus(Level.Game);
 
@@ -18,6 +20,15 @@ function SendHome() {
     }
 
     super.SendHome();
+
+    if (HomeBase != none) {
+        for (P = Level.PawnList; P != none; P = P.NextPawn) {
+            D = P.Location - Location;
+            if (VSize(D * vect(1,1,0)) < P.CollisionRadius + CollisionRadius && Abs(D.Z) < P.CollisionHeight + CollisionHeight) {
+                Touch(P);
+            }
+        }
+    }
 }
 
 function Drop(vector newVel) {

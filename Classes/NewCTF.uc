@@ -51,6 +51,7 @@ function InitSpawnSystem()
     local NavigationPoint N;
     local int PSTeam;
     local PlayerStart PS;
+    local SpawnControlInfo SCI;
 
     for (i = 0; i < MaxNumTeams; i++)
         TeamSpawnCount[i] = 0;
@@ -76,6 +77,15 @@ function InitSpawnSystem()
             PlayerStartList[offset + swapTarget] = PlayerStartList[offset + j];
             PlayerStartList[offset + j] = PS;
         }
+    }
+
+    foreach AllActors(class'SpawnControlInfo', SCI) {
+        SpawnSystemThreshold = SCI.SpawnSystemThreshold;
+        SpawnEnemyBlockRange = SCI.SpawnEnemyBlockRange;
+        SpawnEnemyVisionBlockRange = SCI.SpawnEnemyVisionBlockRange;
+        SpawnFriendlyBlockRange = SCI.SpawnFriendlyBlockRange;
+        SpawnFriendlyVisionBlockRange = SCI.SpawnFriendlyVisionBlockRange;
+        SpawnFlagBlockRange = SCI.SpawnFlagBlockRange;
     }
 }
 
@@ -349,6 +359,23 @@ function bool IsPlayerStartViable(PlayerStart PS)
     local bool enemy, friend;
     local float distance;
     local vector eyeHeight;
+    local float EBR, EVBR, FBR, FVBR, FlagBR;
+    local SpawnControlPlayerStart SCPS;
+
+    EBR = SpawnEnemyBlockRange;
+    EVBR = SpawnEnemyVisionBlockRange;
+    FBR = SpawnFriendlyBlockRange;
+    FVBR = SpawnFriendlyVisionBlockRange;
+    FlagBR = SpawnFlagBlockRange;
+
+    SCPS = SpawnControlPlayerStart(PS);
+    if (SCPS != none) {
+        if (SCPS.SpawnEnemyBlockRange >= 0)          EBR = SCPS.SpawnEnemyBlockRange;
+        if (SCPS.SpawnEnemyVisionBlockRange >= 0)    EVBR = SCPS.SpawnEnemyVisionBlockRange;
+        if (SCPS.SpawnFriendlyBlockRange >= 0)       FBR = SCPS.SpawnFriendlyBlockRange;
+        if (SCPS.SpawnFriendlyVisionBlockRange >= 0) FVBR = SCPS.SpawnFriendlyVisionBlockRange;
+        if (SCPS.SpawnFlagBlockRange >= 0)           FlagBR = SCPS.SpawnFlagBlockRange;
+    }
 
     for (P = Level.PawnList; P != none; P = P.NextPawn) {
         enemy = IsEnemyOfTeam(P, PS.TeamNumber);
@@ -360,13 +387,13 @@ function bool IsPlayerStartViable(PlayerStart PS)
         visible = PS.FastTrace(P.Location + eyeHeight);
         distance = VSize(PS.Location - P.Location + eyeHeight);
 
-        if ( enemy &&  visible && distance <= SpawnEnemyVisionBlockRange)    return false;
-        if ( enemy && !visible && distance <= SpawnEnemyBlockRange)          return false;
-        if (friend &&  visible && distance <= SpawnFriendlyVisionBlockRange) return false;
-        if (friend && !visible && distance <= SpawnFriendlyBlockRange)       return false;
+        if ( enemy &&  visible && distance <= EVBR) return false;
+        if ( enemy && !visible && distance <= EBR)  return false;
+        if (friend &&  visible && distance <= FVBR) return false;
+        if (friend && !visible && distance <= FBR)  return false;
     }
 
-    foreach PS.RadiusActors(class'CTFFlag', F, SpawnFlagBlockRange)
+    foreach PS.RadiusActors(class'CTFFlag', F, FlagBR)
         return false;
 
     return true;

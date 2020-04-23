@@ -8,7 +8,21 @@ event Spawned() {
 }
 
 event Tick(float deltaSeconds) {
-    SetLocation(Owner.Location);
+    local PlayerPawn P;
+    local Actor CameraActor;
+    local vector CameraLocation;
+    local rotator CameraRotation;
+
+    P = PlayerPawn(Owner);
+
+    if (P != none)
+        P.PlayerCalcView(CameraActor, CameraLocation, CameraRotation);
+    else
+        CameraLocation = Owner.Location;
+
+    SetLocation(CameraLocation);
+
+
 }
 
 defaultproperties

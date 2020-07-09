@@ -27,7 +27,6 @@ var(Advantage)   config int  AdvantageDuration;
 
 var bool bAdvantage;
 var bool bAdvantageDone;
-var int AdvantageCountdown;
 
 // size of array should be the result of MaxNumTeams*MaxNumSpawnPointsPerTeam
 var PlayerStart PlayerStartList[64];
@@ -317,17 +316,13 @@ function EndGame(string reason) {
         }
     }
 
-    super.EndGame(reason); // Super is DeathMatchPlus
+    super.EndGame(reason); // Super is GameInfo
 }
 
 function Timer() {
-    if (bAdvantage) {
-        AdvantageCountdown--;
-
-        if (AdvantageCountdown == 0 || IsEveryFlagHome()) {
-            bAdvantageDone = true;
-            RemainingTime = 1;
-        }
+    if (bAdvantage && IsEveryFlagHome()) {
+        bAdvantageDone = true;
+        RemainingTime = 1;
     }
 
     super.Timer(); // Super is DeathMatchPlus

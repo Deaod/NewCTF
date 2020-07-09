@@ -16,6 +16,8 @@ var(SpawnSystem) config float SpawnFriendlyBlockRange;
 var(SpawnSystem) config float SpawnFriendlyVisionBlockRange;
 // Range within which any flag will block a spawn
 var(SpawnSystem) config float SpawnFlagBlockRange;
+// Minimum number of spawn points to cycle through before reusing one
+var(SpawnSystem) config int SpawnMinCycleDistance;
 
 // True results in default behavior, False activates an advantage system
 var(Overtime)    config bool bAllowOvertime;
@@ -424,7 +426,7 @@ function NavigationPoint FindPlayerStart(Pawn Player, optional byte InTeam, opti
        return super.FindPlayerStart(Player, InTeam, incomingName);
 
     psOffset = team * MaxNumSpawnPointsPerTeam;
-    for (i = 0; i < TeamSpawnCount[team]; i++) {
+    for (i = 0; i < TeamSpawnCount[team] - SpawnMinCycleDistance; i++) {
         PS = PlayerStartList[psOffset + i];
 
         if (IsPlayerStartViable(PS)) {
@@ -447,10 +449,11 @@ defaultproperties
 {
     SpawnSystemThreshold=4
     SpawnEnemyBlockRange=500.0
-    SpawnEnemyVisionBlockRange=1000.0
+    SpawnEnemyVisionBlockRange=2000.0
     SpawnFriendlyBlockRange=150.0
     SpawnFriendlyVisionBlockRange=150.0
     SpawnFlagBlockRange=500.0
+    SpawnMinCycleDistance=1
     bAllowOvertime=False
     AdvantageDuration=120
 

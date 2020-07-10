@@ -4,33 +4,22 @@ class NewCTF extends BotPack.CTFGame
 const MaxNumSpawnPointsPerTeam = 16;
 const MaxNumTeams = 4;
 
-// Number of player up until which the old spawn system is used
-var(SpawnSystem) config int   SpawnSystemThreshold;
-// Range within which any enemy, visible or not will block a spawn
-var(SpawnSystem) config float SpawnEnemyBlockRange;
-// Range within which any enemy with vision on the spawn will block it
-var(SpawnSystem) config float SpawnEnemyVisionBlockRange;
-// Range within which any friend, visible or not will block a spawn
-var(SpawnSystem) config float SpawnFriendlyBlockRange;
-// Range within which any friend with vision will block a spawn
-var(SpawnSystem) config float SpawnFriendlyVisionBlockRange;
-// Range within which any flag will block a spawn
-var(SpawnSystem) config float SpawnFlagBlockRange;
-// Minimum number of spawn points to cycle through before reusing one
-var(SpawnSystem) config int SpawnMinCycleDistance;
-
-// True results in default behavior, False activates an advantage system
-var(Overtime)    config bool bAllowOvertime;
-// Extra time if a flag is in play when the game ends, 0 for no limit
-// Never use the value 60, if you like the end-of-match countdown.
-var(Advantage)   config int  AdvantageDuration;
-
 var bool bAdvantage;
 var bool bAdvantageDone;
 
 // size of array should be the result of MaxNumTeams*MaxNumSpawnPointsPerTeam
 var PlayerStart PlayerStartList[64];
 var int         TeamSpawnCount[4];
+
+var Object SettingsHelper;
+var NewCTFServerSettings Settings;
+
+event Spawned() {
+    super.Spawned();
+
+    SettingsHelper = new(self, 'NewCTF') class'Object';
+    Settings = new(SettingsHelper, 'ServerSettings') class'NewCTFServerSettings';
+}
 
 event InitGame(string Options, out string Error) {
     local string opt;
@@ -39,11 +28,11 @@ event InitGame(string Options, out string Error) {
 
     opt = ParseOption(Options, "AllowOvertime");
     if (opt != "" && !(opt ~= "false"))
-        bAllowOvertime = true;
+        Settings.bAllowOvertime = true;
 
     opt = ParseOption(Options, "AdvantageDuration");
     if (opt != "")
-        AdvantageDuration = float(opt);
+        Settings.AdvantageDuration = float(opt);
 }
 
 function InitSpawnSystem()
@@ -81,12 +70,12 @@ function InitSpawnSystem()
     }
 
     foreach AllActors(class'SpawnControlInfo', SCI) {
-        SpawnSystemThreshold = SCI.SpawnSystemThreshold;
-        SpawnEnemyBlockRange = SCI.SpawnEnemyBlockRange;
-        SpawnEnemyVisionBlockRange = SCI.SpawnEnemyVisionBlockRange;
-        SpawnFriendlyBlockRange = SCI.SpawnFriendlyBlockRange;
-        SpawnFriendlyVisionBlockRange = SCI.SpawnFriendlyVisionBlockRange;
-        SpawnFlagBlockRange = SCI.SpawnFlagBlockRange;
+        Settings.SpawnSystemThreshold = SCI.SpawnSystemThreshold;
+        Settings.SpawnEnemyBlockRange = SCI.SpawnEnemyBlockRange;
+        Settings.SpawnEnemyVisionBlockRange = SCI.SpawnEnemyVisionBlockRange;
+        Settings.SpawnFriendlyBlockRange = SCI.SpawnFriendlyBlockRange;
+        Settings.SpawnFriendlyVisionBlockRange = SCI.SpawnFriendlyVisionBlockRange;
+        Settings.SpawnFlagBlockRange = SCI.SpawnFlagBlockRange;
     }
 }
 
@@ -150,11 +139,10 @@ function PostBeginPlay() {
     InitSpawnSystem();
     InitFlags();
 
-    if (AdvantageDuration == 60) {
+    if (Settings.AdvantageDuration == 60) {
         Warn("AdvantageDuration of 60 does not trigger a countdown before advantage end.");
         Warn("Changed AdvantageDuration to 59 as a workaround");
-        AdvantageDuration = 59;
-        SaveConfig();
+        Settings.AdvantageDuration = 59;
     }
 }
 
@@ -275,7 +263,7 @@ function bool SetEndCams(string Reason) {
 
 function EndGame(string reason) {
     if (reason ~= "timelimit") {
-        if (bAllowOvertime && GetBestTeam() == none) {
+        if (Settings.bAllowOvertime && GetBestTeam() == none) {
             bOverTime = true;
             BroadcastLocalizedMessage(DMMessageClass, 0);
             BroadcastLocalizedMessage(
@@ -287,7 +275,7 @@ function EndGame(string reason) {
 
         if (bAdvantageDone == false && bAdvantage == false && IsEveryFlagHome() == false) {
             bAdvantage = true;
-            RemainingTime = AdvantageDuration;
+            RemainingTime = Settings.AdvantageDuration;
             // Youre probably wondering why the value 60 cant be used. Well, its
             // because of the interaction between variable replication, and how
             // the remaining time is synchronized between server and client.
@@ -305,7 +293,7 @@ function EndGame(string reason) {
             // GRI.RemainingMinute as unchanged, and thus unreplicated.
             //
             // This is why AdvantageDuration can have any value other than 60.
-            GameReplicationInfo.RemainingMinute = AdvantageDuration;
+            GameReplicationInfo.RemainingMinute = Settings.AdvantageDuration;
             BroadcastLocalizedMessage(
                 class'NewCTFMessages',
                 6, // Advantage
@@ -357,11 +345,11 @@ function bool IsPlayerStartViable(PlayerStart PS)
     local float EBR, EVBR, FBR, FVBR, FlagBR;
     local SpawnControlPlayerStart SCPS;
 
-    EBR = SpawnEnemyBlockRange;
-    EVBR = SpawnEnemyVisionBlockRange;
-    FBR = SpawnFriendlyBlockRange;
-    FVBR = SpawnFriendlyVisionBlockRange;
-    FlagBR = SpawnFlagBlockRange;
+    EBR = Settings.SpawnEnemyBlockRange;
+    EVBR = Settings.SpawnEnemyVisionBlockRange;
+    FBR = Settings.SpawnFriendlyBlockRange;
+    FVBR = Settings.SpawnFriendlyVisionBlockRange;
+    FlagBR = Settings.SpawnFlagBlockRange;
 
     SCPS = SpawnControlPlayerStart(PS);
     if (SCPS != none) {
@@ -415,11 +403,11 @@ function NavigationPoint FindPlayerStart(Pawn Player, optional byte InTeam, opti
                 return Tel;
     // end of copy
 
-    if (team >= MaxNumTeams || NumPlayers <= SpawnSystemThreshold)
+    if (team >= MaxNumTeams || NumPlayers <= Settings.SpawnSystemThreshold)
        return super.FindPlayerStart(Player, InTeam, incomingName);
 
     psOffset = team * MaxNumSpawnPointsPerTeam;
-    for (i = 0; i < TeamSpawnCount[team] - SpawnMinCycleDistance; i++) {
+    for (i = 0; i < TeamSpawnCount[team] - Settings.SpawnMinCycleDistance; i++) {
         PS = PlayerStartList[psOffset + i];
 
         if (IsPlayerStartViable(PS)) {
@@ -440,15 +428,5 @@ function NavigationPoint FindPlayerStart(Pawn Player, optional byte InTeam, opti
 
 defaultproperties
 {
-    SpawnSystemThreshold=4
-    SpawnEnemyBlockRange=500.0
-    SpawnEnemyVisionBlockRange=2000.0
-    SpawnFriendlyBlockRange=150.0
-    SpawnFriendlyVisionBlockRange=150.0
-    SpawnFlagBlockRange=500.0
-    SpawnMinCycleDistance=1
-    bAllowOvertime=False
-    AdvantageDuration=120
-
     GameName="New Capture the Flag"
 }

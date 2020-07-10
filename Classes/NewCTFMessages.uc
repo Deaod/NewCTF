@@ -3,11 +3,9 @@ class NewCTFMessages extends LocalMessage
 
 const Version = 1;
 
-var(Announcer) config bool   bEnabled;
-var(Announcer) config float  AnnouncerVolume;
-var(Announcer) config string CTFAnnouncerClass;
-var(Debug)     config bool   Debug;
-var()          config int    _Version;
+var Object SettingsHelper;
+var NewCTFClientSettings Settings;
+
 var NewCTFAnnouncer Announcer;
 var bool bInitialized;
 
@@ -18,11 +16,12 @@ static function ClientReceive(
 	optional PlayerReplicationInfo PRI2,
 	optional Object O
 ) {
-    if (default.Debug) Log("["$P.Level.TimeSeconds$"] ClientReceive"@P@ID@PRI1@PRI2@O);
     if (default.bInitialized == false)
         InitAnnouncements(P, P);
 
-    if (default.bEnabled == false || default.Announcer == none) return;
+    if (default.Settings.Debug) Log("["$P.Level.TimeSeconds$"] ClientReceive"@P@ID@PRI1@PRI2@O);
+
+    if (default.Settings.bEnabled == false || default.Announcer == none) return;
 
     if ((PRI1 == none) || (PRI1 != none && P.PlayerReplicationInfo != PRI1)) {
         if (TeamInfo(O) != none)
@@ -33,20 +32,18 @@ static function ClientReceive(
 }
 
 static function UpgradeConfiguration() {
-    if (default._Version < Version) {
-        if (default.Debug) Log("UpgradeConfiguration from"@default._Version@"to"@Version);
+    if (default.Settings._Version < Version) {
+        if (default.Settings.Debug) Log("UpgradeConfiguration from"@default.Settings._Version@"to"@Version);
         // Upgrade logic
         // all cases should fall through
-        switch(default._Version) {
+        switch(default.Settings._Version) {
             case 0:
-                if (default.AnnouncerVolume > 6)
-                    default.AnnouncerVolume = 1.5;
+                if (default.Settings.AnnouncerVolume > 6)
+                    default.Settings.AnnouncerVolume = 1.5;
         }
 
-        default._Version = Version;
+        default.Settings._Version = Version;
     }
-
-    StaticSaveConfig(); // create default configuration in User.ini
 }
 
 static function PlayerPawn GetLocalPlayer(actor Ctx) {
@@ -63,7 +60,7 @@ static function CreateAnnouncer(actor Ctx, PlayerPawn LP) {
     local PlayerPawn P;
     local class<NewCTFAnnouncer> C;
 
-    if (default.bEnabled == false) return;
+    if (default.Settings.bEnabled == false) return;
 
     P = LP;
     if (P == none) {
@@ -71,34 +68,28 @@ static function CreateAnnouncer(actor Ctx, PlayerPawn LP) {
         if (P == none) return;
     }
 
-    C = class<NewCTFAnnouncer>(DynamicLoadObject(default.CTFAnnouncerClass, class'class'));
+    C = class<NewCTFAnnouncer>(DynamicLoadObject(default.Settings.CTFAnnouncerClass, class'class'));
     if (C == none) return;
 
     default.Announcer = P.Spawn(C);
     if (default.Announcer == none) return;
 
     default.Announcer.LocalPlayer = P;
-    default.Announcer.AnnouncerVolume = default.AnnouncerVolume;
+    default.Announcer.AnnouncerVolume = default.Settings.AnnouncerVolume;
     default.Announcer.InitAnnouncer();
 }
 
 static function InitAnnouncements(actor Ctx, optional PlayerPawn LP) {
     if (default.bInitialized) return;
 
-    if (default.Debug) Log("["$Ctx.Level.TimeSeconds$"] InitAnnouncements");
+    default.SettingsHelper = new(LP, 'NewCTF') class'Object';
+    default.Settings = new(default.SettingsHelper, 'ClientSettings') class'NewCTFClientSettings';
+    Log("Created ClientSettings Object, saving ...",'NewCTF');
+    default.Settings.SaveConfig();
+
+    if (default.Settings.Debug) Log("["$Ctx.Level.TimeSeconds$"] InitAnnouncements");
     UpgradeConfiguration();
     CreateAnnouncer(Ctx, LP);
 
     default.bInitialized = true;
-}
-
-defaultproperties
-{
-    bEnabled=True
-    AnnouncerVolume=1.5
-    CTFAnnouncerClass="NewCTF.DefaultAnnouncer"
-    Debug=False
-    _Version=0
-
-    bInitialized=false
 }

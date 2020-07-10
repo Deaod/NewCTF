@@ -14,17 +14,15 @@ var int         TeamSpawnCount[4];
 var Object SettingsHelper;
 var NewCTFServerSettings Settings;
 
-event Spawned() {
-    super.Spawned();
-
-    SettingsHelper = new(self, 'NewCTF') class'Object';
-    Settings = new(SettingsHelper, 'ServerSettings') class'NewCTFServerSettings';
-}
-
 event InitGame(string Options, out string Error) {
     local string opt;
 
     super.InitGame(Options, Error);
+
+    SettingsHelper = new(self, 'NewCTF') class'Object';
+    Settings = new(SettingsHelper, 'ServerSettings') class'NewCTFServerSettings';
+    Log("Created ServerSettings Object, saving ...",'NewCTF');
+    Settings.SaveConfig();
 
     opt = ParseOption(Options, "AllowOvertime");
     if (opt != "" && !(opt ~= "false"))

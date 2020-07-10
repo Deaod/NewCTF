@@ -8,7 +8,7 @@ Enhanced CTF Gamemode for UnrealTournament. It adds the following features compa
 
 ## Installation
 
-1. Copy NewCTF.u into System folder
+1. Copy NewCTF.u and SpawnControl.u into System folder
 1. Add to `ServerPackage`s
 1. Set Gamemode to NewCTF.NewCTF
 
@@ -63,3 +63,16 @@ Specifies the range within which a Flag will block a spawn from being used, rega
 
 #### SpawnMinCycleDistance
 Specifies the number of other spawn points that have to have been used before a given spawn point can be used again. Setting it to 0 disables this restriction.
+
+### SpawnControl
+SpawnControl is a tiny add-on for map makers that allows them to provide alternate spawn system settings for a single map.
+
+For this purpose SpawnControl contains two placeable actors, `SpawnControlInfo` and `SpawnControlPlayerStart`.
+
+In order to use it, place the file SpawnControl.u in your System folder and add `EditPackages=SpawnControl` to section `[Editor.EditorEngine]` in UnrealTournament.ini.
+
+#### SpawnControlInfo
+Can be placed anywhere on the map, is invisible and contains alternate settings for the entire map.
+
+#### SpawnControlPlayerStart
+This is a replacement for the default PlayerStart. It behaves like it in every way, but provides a way to override Range settings of the spawn system for a single spawn point.

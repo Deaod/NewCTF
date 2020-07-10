@@ -23,3 +23,43 @@ Enhanced CTF Gamemode for UnrealTournament. It adds the following features compa
 ### Command Line
 - `?AdvantageDuration=X` changes AdvantageDuration to X
 - `?AllowOvertime=(true/false)` sets whether Overtime is allowed for a given configuration or not
+
+## Spawn System
+
+NewCTF comes with a new spawn system, replacing the default one. For the purposes of this document, spawn point and PlayerStart refer to the same thing.
+
+NewCTF has a list of spawn points for each team, which is created at the start of each map and shuffled once.
+
+Every time a player tries to respawn during the game, the spawn system goes through the list of that player's team and tries to find a spawn point that can be **used**. If it finds a spawn point that can be used, that spawn point is moved to the end of the list. If no suitable spawn point can be found, the system lets the default spawn system find a spawn point.
+
+A spawn point can be **used** if:
+1. The number of players on the server is greater than `SpawnSystemThreshold`,
+2. No enemy is within `SpawnEnemyBlockRange` of the spawn point,
+3. No enemy is within `SpawnEnemyVisionBlockRange` and has vision of the spawn point (tracing EyeHeight of player to Location of spawn point),
+4. No teammate is within `SpawnFriendlyBlockRange` of the spawn point,
+5. No teammate is within `SpawnFriendlyVisionBlockRange` and has vision of the spawn point,
+6. No flag is within `SpawnFlagBlockRange` of the spawn point and
+7. At least `SpawnMinCycleDistance` other spawn points have been used since the last time this one was used
+
+### Settings
+
+#### SpawnSystemThreshold
+Specifies the maximum number of players on a map that will not use the new spawn system. Set to 0 to always use it, or to a very high value to never use it.
+
+#### SpawnEnemyBlockRange
+Specifies the range within which an enemy will block a spawn from being used, no matter the visibility.
+
+#### SpawnEnemyVisionBlockRange
+Specifies the range within which an enemy with vision of the spawn point will block it from being used.
+
+#### SpawnFriendlyBlockRange
+Specifies the range within which a teammate will block a spawn from being used, regardless of visibility.
+
+#### SpawnFriendlyVisionBlockRange
+Specifies the range within which a teammate with vision of the spawn point will block it from being used.
+
+#### SpawnFlagBlockRange
+Specifies the range within which a Flag will block a spawn from being used, regardless of visibility.
+
+#### SpawnMinCycleDistance
+Specifies the number of other spawn points that have to have been used before a given spawn point can be used again. Setting it to 0 disables this restriction.

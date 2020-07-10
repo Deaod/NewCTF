@@ -185,7 +185,6 @@ function ScoreFlag(Pawn Scorer, CTFFlag F) {
     }
 
     if (AllHome) {
-        AdvantageCountdown = 0;
         bAdvantageDone = true;
         bAdvantage = false;
         EndGame("timelimit");
@@ -288,7 +287,6 @@ function EndGame(string reason) {
 
         if (bAdvantageDone == false && bAdvantage == false && IsEveryFlagHome() == false) {
             bAdvantage = true;
-            AdvantageCountdown = AdvantageDuration;
             RemainingTime = AdvantageDuration;
             // Youre probably wondering why the value 60 cant be used. Well, its
             // because of the interaction between variable replication, and how

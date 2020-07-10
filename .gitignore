@@ -1,2 +1,4 @@
+/System/**/*
+
 *.sublime-project
 *.sublime-workspace

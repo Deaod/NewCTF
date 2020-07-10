@@ -44,6 +44,8 @@ static function UpgradeConfiguration() {
 
         default.Settings._Version = Version;
     }
+
+    default.Settings.SaveConfig(); // create default configuration
 }
 
 static function PlayerPawn GetLocalPlayer(actor Ctx) {

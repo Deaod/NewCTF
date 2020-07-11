@@ -26,11 +26,11 @@ var(Advantage)   config int  AdvantageDuration;
 defaultproperties
 {
     SpawnSystemThreshold=4
-    SpawnEnemyBlockRange=500.0
+    SpawnEnemyBlockRange=650.0
     SpawnEnemyVisionBlockRange=2000.0
     SpawnFriendlyBlockRange=150.0
     SpawnFriendlyVisionBlockRange=150.0
-    SpawnFlagBlockRange=500.0
+    SpawnFlagBlockRange=750.0
     SpawnMinCycleDistance=1
 
     bAllowOvertime=False

@@ -1,4 +1,4 @@
-/System/**/*
+/System/**/NewCTF*
 
 *.sublime-project
 *.sublime-workspace

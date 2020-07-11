@@ -1,5 +1,4 @@
-class NewCTFMessages extends LocalMessage
-    config(User);
+class NewCTFMessages extends LocalMessage;
 
 const Version = 1;
 

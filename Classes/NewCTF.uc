@@ -1,5 +1,4 @@
-class NewCTF extends BotPack.CTFGame
-    config;
+class NewCTF extends BotPack.CTFGame;
 
 const MaxNumSpawnPointsPerTeam = 16;
 const MaxNumTeams = 4;

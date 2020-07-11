@@ -20,7 +20,7 @@ static function ClientReceive(
 
     if (default.Settings.Debug) Log("["$P.Level.TimeSeconds$"] ClientReceive"@P@ID@PRI1@PRI2@O, 'NewCTF');
 
-    if (default.Settings.bEnabled == false || default.Announcer == none) return;
+    if (default.Announcer == none) return;
 
     if ((PRI1 == none) || (PRI1 != none && P.PlayerReplicationInfo != PRI1)) {
         if (TeamInfo(O) != none)
@@ -60,8 +60,6 @@ static function PlayerPawn GetLocalPlayer(actor Ctx) {
 static function CreateAnnouncer(actor Ctx, PlayerPawn LP) {
     local PlayerPawn P;
     local class<NewCTFAnnouncer> C;
-
-    if (default.Settings.bEnabled == false) return;
 
     P = LP;
     if (P == none) {

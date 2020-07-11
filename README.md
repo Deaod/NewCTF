@@ -1,28 +1,89 @@
 # NewCTF
 Enhanced CTF Gamemode for UnrealTournament. It adds the following features compared to the default CTF gamemode:
 
-- Custom spawn system
-- Announcer for flag events (Taken/Dropped/Returned/Captured), plus a few other events
-- Advantage system to allow flags in play at the end of a match to be resolved, within a limited amount of time
-- Option to not play overtime and instead have draws
+* Custom spawn system
+* Announcer for flag events (Taken/Dropped/Returned/Captured), plus a few other events
+* Advantage system to allow flags in play at the end of a match to be resolved, within a limited amount of time
+* Option to not play overtime and instead have draws
 
 ## Installation
 
-1. Copy NewCTF.u and SpawnControl.u into System folder
-1. Add to `ServerPackage`s
-1. Set Gamemode to NewCTF.NewCTF
+1. Copy NewCTFv9.u and SpawnControl.u into System folder
+2. Add to `ServerPackage`s:  
+```
+ServerPackage=SpawnControl
+ServerPackage=NewCTFv9
+```
+3. Set Gamemode to NewCTFv9.NewCTF (replacing Botpack.CTFGame)
 
-## Options
+## Client Settings
 
-### INI
+The settings for clients/players can be found in NewCTF.ini in your System folder, the contents of which will be similar to this:
+```ini
+[ClientSettings]
+AnnouncerVolume=1.5
+CTFAnnouncerClass=NewCTFv9.DefaultAnnouncer
+Debug=False
+_Version=1
+```
 
-- Spawn System can be adjusted in UnrealTournament.ini
-- Default AdvantageDuration can be configured there as well
-- Default for bAllowOvertime can be set the same way.
+### AnnouncerVolume
+Controls the volume of announcements. Valid settings range from `0.0` to `6.0`.
 
-### Command Line
-- `?AdvantageDuration=X` changes AdvantageDuration to X
-- `?AllowOvertime=(true/false)` sets whether Overtime is allowed for a given configuration or not
+### CTFAnnouncerClass
+Which announcements to use. NewCTF comes with two announcers: NewCTFv9.DefaultAnnouncer and NewCTFv9.NewCTFAnnouncer.
+
+Announcers can have custom sounds for the following CTF events:
+* FlagDropped - When a flag was dropped by a player
+* FlagReturned - When a player returned a flag
+* FlagTaken - When a player took a flag off its FlagBase
+* FlagScored - When a player captured the enemy flag
+* GotFlag - When you picked up the flag yourself
+* Overtime - When the game goes into Overtime
+* Advantage - When the game goes into Advantage
+* Draw - When the game finishes as a draw
+
+Note that all announcements play in addition to the games internal sounds
+
+#### NewCTFv9.DefaultAnnouncer
+Only provides custom sounds for Overtime, Advantage, and Draw, which would not have sounds otherwise.
+
+#### NewCTFv9.NewCTFAnnouncer
+Provides sounds for all events.
+
+### Debug
+Setting this to true causes NewCTF to log all incoming announcement notifications.
+
+### \_Version
+This is an version number for your settings, used to automatically upgrade your settings with new versions of NewCTF.
+
+## Server Settings
+The settings for servers can be found in NewCTF.ini in your System folder, the contents of which will be similar to this:
+
+```ini
+[ServerSettings]
+SpawnSystemThreshold=4
+SpawnEnemyBlockRange=650.0
+SpawnEnemyVisionBlockRange=2000.0
+SpawnFriendlyBlockRange=150.0
+SpawnFriendlyVisionBlockRange=150.0
+SpawnFlagBlockRange=750.0
+SpawnMinCycleDistance=1
+bAllowOvertime=False
+AdvantageDuration=120
+```
+
+### Spawn*
+These settings will be explained in the [Spawn System](#spawn-system) section.
+
+### bAllowOvertime
+Whether to allow a match to go into overtime, or to end the game in a draw.  
+Can also be set through the URL using `?AllowOvertime=(true/false)`.
+
+### AdvantageDuration
+How much time (in seconds) to add on top of the regular time to allow flags in play at the end to be resolved. Note that due to implementation details AdvantageDuration can not be set to 60 seconds. NewCTF will write a warning about this to the log and set AdvantageDuration to 59 automatically.  
+Can also be set through the URL using `?AdvantageDuration=X`.  
+See section [Advantage](#advantage).
 
 ## Spawn System
 
@@ -76,3 +137,16 @@ Can be placed anywhere on the map, is invisible and contains alternate settings 
 
 #### SpawnControlPlayerStart
 This is a replacement for the default PlayerStart. It behaves like it in every way, but provides a way to override Range settings of the spawn system for a single spawn point.
+
+## Advantage
+NewCTF introduces an advantage system which delays the end of a match if at least one flag is not on its FlagBase at the end of the regular time. Advantage will end once all flags are on their FlagBases, either by being returned or by being captured, or alternatively it will end when the additional time granted by the [AdvantageDuration](#advantageduration) setting runs out.
+
+### Interaction with Overtime
+Advantage applies even if overtime is allowed.  
+The game might first go into Advantage, then into Overtime if the resolution of Advantage resulted in a drawn game.
+
+## Building
+1. Open a command line window, go to your UnrealTournament installation folder and clone this repository using `git clone https://github.com/Deaod/NewCTF.git`
+2. Before the first build, copy the contents of the System folder in this repository to the System folder of your UnrealTournament installation
+3. Open UnrealTournament.ini, find section `[Editor.EditorEngine]`, and add `EditPackages=SpawnControl` and `EditPackages=NewCTF` at the end
+4. Use build.bat to build a new NewCTF.u, which will also be copied to the System folder of this repository

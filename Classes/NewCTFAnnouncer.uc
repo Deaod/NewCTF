@@ -103,41 +103,41 @@ function AnnouncementContent GetAnnouncementContent(byte Ann, optional byte Team
 }
 
 event Spawned() {
-    FlagDropped[0].Slots[0].Snd = sound'NewCTF.RedFlagDropped';
+    FlagDropped[0].Slots[0].Snd = sound'RedFlagDropped';
     FlagDropped[0].Slots[0].Section = ANNS_Team;
     FlagDropped[0].Duration = 0;
-    FlagDropped[1].Slots[0].Snd = sound'NewCTF.BlueFlagDropped';
+    FlagDropped[1].Slots[0].Snd = sound'BlueFlagDropped';
     FlagDropped[1].Slots[0].Section = ANNS_Team;
     FlagDropped[1].Duration = 0;
 
-    FlagReturned[0].Slots[0].Snd = sound'NewCTF.RedFlagReturned';
+    FlagReturned[0].Slots[0].Snd = sound'RedFlagReturned';
     FlagReturned[0].Slots[0].Section = ANNS_Team;
     FlagReturned[0].Duration = 0;
-    FlagReturned[1].Slots[0].Snd = sound'NewCTF.BlueFlagReturned';
+    FlagReturned[1].Slots[0].Snd = sound'BlueFlagReturned';
     FlagReturned[1].Slots[0].Section = ANNS_Team;
     FlagReturned[1].Duration = 0;
 
-    FlagTaken[0].Slots[0].Snd = sound'NewCTF.RedFlagTaken';
+    FlagTaken[0].Slots[0].Snd = sound'RedFlagTaken';
     FlagTaken[0].Slots[0].Section = ANNS_Team;
     FlagTaken[0].Duration = 0;
-    FlagTaken[1].Slots[0].Snd = sound'NewCTF.BlueFlagTaken';
+    FlagTaken[1].Slots[0].Snd = sound'BlueFlagTaken';
     FlagTaken[1].Slots[0].Section = ANNS_Team;
     FlagTaken[1].Duration = 0;
 
-    FlagScored[0].Slots[0].Snd = sound'NewCTF.RedTeamScores';
+    FlagScored[0].Slots[0].Snd = sound'RedTeamScores';
     FlagScored[0].Slots[0].Section = ANNS_Team;
     FlagScored[0].Duration = 0;
-    FlagScored[1].Slots[0].Snd = sound'NewCTF.BlueTeamScores';
+    FlagScored[1].Slots[0].Snd = sound'BlueTeamScores';
     FlagScored[1].Slots[0].Section = ANNS_Team;
     FlagScored[1].Duration = 0;
 
-    Overtime.Slots[0].Snd = sound'NewCTF.Overtime';
+    Overtime.Slots[0].Snd = sound'Overtime';
     Overtime.Duration = 0;
-    AdvantageGeneric.Slots[0].Snd = sound'NewCTF.AdvantageGeneric';
+    AdvantageGeneric.Slots[0].Snd = sound'AdvantageGeneric';
     AdvantageGeneric.Duration = 0;
-    Draw.Slots[0].Snd = sound'NewCTF.Draw';
+    Draw.Slots[0].Snd = sound'Draw';
     Draw.Duration = 0;
-    GotFlag.Slots[0].Snd = sound'NewCTF.GotFlag';
+    GotFlag.Slots[0].Snd = sound'GotFlag';
     GotFlag.Duration = 0;
 }
 
@@ -148,10 +148,10 @@ function InitSections() {
 
     if (P == none) return;
 
-    General = P.Spawn(class'NewCTF.AnnouncementPlayer', P);
+    General = P.Spawn(class'AnnouncementPlayer', P);
 
     for (i = 0; i < MaxNumTeams; i++) {
-        Team[i] = P.Spawn(class'NewCTF.AnnouncementPlayer', P);
+        Team[i] = P.Spawn(class'AnnouncementPlayer', P);
     }
 }
 

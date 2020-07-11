@@ -18,7 +18,7 @@ static function ClientReceive(
     if (default.bInitialized == false)
         InitAnnouncements(P, P);
 
-    if (default.Settings.Debug) Log("["$P.Level.TimeSeconds$"] ClientReceive"@P@ID@PRI1@PRI2@O);
+    if (default.Settings.Debug) Log("["$P.Level.TimeSeconds$"] ClientReceive"@P@ID@PRI1@PRI2@O, 'NewCTF');
 
     if (default.Settings.bEnabled == false || default.Announcer == none) return;
 
@@ -32,7 +32,7 @@ static function ClientReceive(
 
 static function UpgradeConfiguration() {
     if (default.Settings._Version < Version) {
-        if (default.Settings.Debug) Log("UpgradeConfiguration from"@default.Settings._Version@"to"@Version);
+        if (default.Settings.Debug) Log("UpgradeConfiguration from"@default.Settings._Version@"to"@Version, 'NewCTF');
         // Upgrade logic
         // all cases should fall through
         switch(default.Settings._Version) {
@@ -85,10 +85,10 @@ static function InitAnnouncements(actor Ctx, optional PlayerPawn LP) {
 
     default.SettingsHelper = new(LP, 'NewCTF') class'Object';
     default.Settings = new(default.SettingsHelper, 'ClientSettings') class'NewCTFClientSettings';
-    Log("Created ClientSettings Object, saving ...",'NewCTF');
+    Log("Created ClientSettings Object, saving ...", 'NewCTF');
     default.Settings.SaveConfig();
 
-    if (default.Settings.Debug) Log("["$Ctx.Level.TimeSeconds$"] InitAnnouncements");
+    if (default.Settings.Debug) Log("["$Ctx.Level.TimeSeconds$"] InitAnnouncements", 'NewCTF');
     UpgradeConfiguration();
     CreateAnnouncer(Ctx, LP);
 

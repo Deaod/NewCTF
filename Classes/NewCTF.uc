@@ -20,7 +20,7 @@ event InitGame(string Options, out string Error) {
 
     SettingsHelper = new(self, 'NewCTF') class'Object';
     Settings = new(SettingsHelper, 'ServerSettings') class'NewCTFServerSettings';
-    Log("Created ServerSettings Object, saving ...",'NewCTF');
+    Log("Created ServerSettings Object, saving ...", 'NewCTF');
     Settings.SaveConfig();
 
     opt = ParseOption(Options, "AllowOvertime");

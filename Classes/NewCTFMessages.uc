@@ -30,6 +30,22 @@ static function ClientReceive(
     }
 }
 
+static function string PackageName() {
+    local string S;
+
+    S = string(class'NewCTFMessages');
+    return Left(S, InStr(S, "."));
+}
+
+static function string ReplacePackage(string In) {
+    local int Pos;
+
+    Pos = InStr(In, ".");
+    if (Pos == -1) return In; // nothing to replace
+
+    return PackageName() $ Mid(In, Pos, Len(In));
+}
+
 static function UpgradeConfiguration() {
     if (default.Settings._Version < Version) {
         if (default.Settings.Debug) Log("UpgradeConfiguration from"@default.Settings._Version@"to"@Version, 'NewCTF');
@@ -42,6 +58,10 @@ static function UpgradeConfiguration() {
         }
 
         default.Settings._Version = Version;
+    }
+
+    if (Left(default.Settings.CTFAnnouncerClass, 6) ~= "NewCTF") {
+        default.Settings.CTFAnnouncerClass = ReplacePackage(default.Settings.CTFAnnouncerClass);
     }
 
     default.Settings.SaveConfig(); // create default configuration

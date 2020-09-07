@@ -146,7 +146,6 @@ Advantage applies even if overtime is allowed.
 The game might first go into Advantage, then into Overtime if the resolution of Advantage resulted in a drawn game.
 
 ## Building
-1. Open a command line window, go to your UnrealTournament installation folder and clone this repository using `git clone https://github.com/Deaod/NewCTF.git`
-2. Before the first build, copy the contents of the System folder in this repository to the System folder of your UnrealTournament installation
-3. Open UnrealTournament.ini, find section `[Editor.EditorEngine]`, and add `EditPackages=SpawnControl` and `EditPackages=NewCTF` at the end
-4. Use build.bat to build a new NewCTF.u, which will also be copied to the System folder of this repository
+1. Open a command line window, go to your UnrealTournament installation folder and clone this repository using `git clone https://github.com/Deaod/NewCTF.git NewCTFv10`
+2. Before the first build, copy SpawnControl.u from the System folder in this repository to the System folder of your UnrealTournament installation
+3. Use build.bat to build a new NewCTFv10.u, which will also be copied to the System folder of this repository

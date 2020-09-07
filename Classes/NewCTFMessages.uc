@@ -50,7 +50,7 @@ static function UpgradeConfiguration() {
 static function PlayerPawn GetLocalPlayer(actor Ctx) {
     local Pawn P;
 
-    for (P = Ctx.Level.PawnList; P != none; P = P.NextPawn)
+    foreach Ctx.AllActors(class'Pawn', P)
         if ((PlayerPawn(P) != none) && Viewport(PlayerPawn(P).Player) != none)
             return PlayerPawn(P);
 

@@ -302,7 +302,7 @@ function PlayerPawn GetLocalPlayer() {
 
     if (LocalPlayer != none) return LocalPlayer;
 
-    for (P = Level.PawnList; P != none; P = P.NextPawn) {
+    foreach AllActors(class'Pawn', P) {
         if ((PlayerPawn(P) != none) && Viewport(PlayerPawn(P).Player) != none) {
             LocalPlayer = PlayerPawn(P);
             break;

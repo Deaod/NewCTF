@@ -1,4 +1,5 @@
 /System/**/NewCTF*.u*
 
-*.sublime-project
+PostBuildHook.bat
+
 *.sublime-workspace

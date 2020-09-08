@@ -78,7 +78,7 @@ These settings will be explained in the [Spawn System](#spawn-system) section.
 
 ### bAllowOvertime
 Whether to allow a match to go into overtime, or to end the game in a draw.  
-Can also be set through the URL using `?AllowOvertime=(true/false)`.
+Can also be set through the URL using `?bAllowOvertime=(true/false)`.
 
 ### AdvantageDuration
 How much time (in seconds) to add on top of the regular time to allow flags in play at the end to be resolved. Note that due to implementation details AdvantageDuration can not be set to 60 seconds. NewCTF will write a warning about this to the log and set AdvantageDuration to 59 automatically.  

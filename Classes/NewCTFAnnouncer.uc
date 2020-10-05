@@ -275,7 +275,6 @@ event Timer() {
 }
 
 function Announce(byte A, optional byte Team) {
-    local Sound S;
     local float Duration;
     local int i;
 

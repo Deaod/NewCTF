@@ -93,7 +93,6 @@ function InitSpawnSystem()
 
 function InitFlags() {
     local FlagBase FB;
-    local int i;
     local NewCTFFlag F;
     local CTFFlag oldF;
     local CTFReplicationInfo ctfState;

@@ -329,20 +329,20 @@ function Timer() {
     }
 }
 
-function bool IsEnemyOfTeam(Pawn P, byte team)
-{
+function bool IsParticipant(Pawn P) {
     return (P.PlayerReplicationInfo != none)
-        && (P.PlayerReplicationInfo.Team != team)
         && (P.Health > 0)
         && (P.IsA('Spectator') == false);
 }
 
+function bool IsEnemyOfTeam(Pawn P, byte team)
+{
+    return (P.PlayerReplicationInfo.Team != team);
+}
+
 function bool IsFriendOfTeam(Pawn P, byte team)
 {
-    return (P.PlayerReplicationInfo != none)
-        && (P.PlayerReplicationInfo.Team == team)
-        && (P.Health > 0)
-        && (P.IsA('Spectator') == false);
+    return (P.PlayerReplicationInfo.Team == team);
 }
 
 function bool IsPlayerStartViable(PlayerStart PS)
@@ -372,10 +372,9 @@ function bool IsPlayerStartViable(PlayerStart PS)
     }
 
     for (P = Level.PawnList; P != none; P = P.NextPawn) {
+        if (IsParticipant(P) == false) continue;
         enemy = IsEnemyOfTeam(P, PS.TeamNumber);
         friend = IsFriendOfTeam(P, PS.TeamNumber);
-
-        if (!enemy && !friend) continue;
 
         eyeHeight.Z = P.BaseEyeHeight;
         visible = PS.FastTrace(P.Location + eyeHeight);

@@ -72,6 +72,7 @@ SpawnMinCycleDistance=1
 bAllowOvertime=False
 AdvantageDuration=120
 MercyScore=0
+bFlagGlow=True
 ```
 
 ### Spawn*
@@ -88,8 +89,12 @@ See section [Advantage](#advantage).
 
 ### MercyScore
 If MercyScore is greater than 0, and one team is at least one more than
-MercyScore ahead of their closest opponent, the game ends immediately.
+MercyScore ahead of their closest opponent, the game ends immediately.  
 Can also be set through the URL using `?MercyScore=X`.
+
+### bFlagGlow
+Controls whether flags glow when being carried by players.  
+Can also be set through the URL using `bFlagGlow=(True/False)`.
 
 ## Spawn System
 

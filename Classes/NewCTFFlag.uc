@@ -102,9 +102,15 @@ auto state Home {
 }
 
 function SetHolderLighting() {
+    local NewCTF G;
+
     super.SetHolderLighting();
-    Holder.LightType = LT_None;
-    Holder.AmbientGlow = Holder.default.AmbientGlow;
+
+    G = NewCTF(Level.Game);
+    if (G != none && G.bFlagGlow == false) {
+        Holder.LightType = LT_None;
+        Holder.AmbientGlow = Holder.default.AmbientGlow;
+    }
 }
 
 DefaultProperties

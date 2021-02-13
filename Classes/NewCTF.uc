@@ -16,13 +16,15 @@ var(SpawnSystem) config float SpawnFlagBlockRange;
 var(SpawnSystem) config int SpawnMinCycleDistance;
 
 // True results in default behavior, False activates an advantage system
-var(Overtime)    config bool bAllowOvertime;
+var(Game) config bool bAllowOvertime;
 // Extra time if a flag is in play when the game ends, 0 for no limit
 // Never use the value 60, if you like the end-of-match countdown.
-var(Advantage)   config int  AdvantageDuration;
+var(Game) config int  AdvantageDuration;
 // Maximum score difference between best team and second-best team.
 // If exceeded, game ends immediately.
-var(Game)        config int  MercyScore;
+var(Game) config int  MercyScore;
+// Whether flags glow when held by players.
+var(Game) config bool bFlagGlow;
 
 const MaxNumSpawnPointsPerTeam = 16;
 const MaxNumTeams = 4;
@@ -55,6 +57,10 @@ event InitGame(string Options, out string Error) {
     opt = ParseOption(Options, "MercyScore");
     if (opt != "")
         MercyScore = int(opt);
+
+    opt = ParseOption(Options, "bFlagGlow");
+    if (opt != "" && !(opt ~= "false"))
+        bFlagGlow = true;
 }
 
 function InitSpawnSystem()
@@ -503,6 +509,7 @@ defaultproperties
     bAllowOvertime=False
     AdvantageDuration=120
     MercyScore=0
+    bFlagGlow=True
 
     GameName="New Capture the Flag"
 }

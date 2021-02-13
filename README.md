@@ -71,6 +71,7 @@ SpawnFlagBlockRange=750.0
 SpawnMinCycleDistance=1
 bAllowOvertime=False
 AdvantageDuration=120
+MercyScore=0
 ```
 
 ### Spawn*
@@ -84,6 +85,11 @@ Can also be set through the URL using `?bAllowOvertime=(true/false)`.
 How much time (in seconds) to add on top of the regular time to allow flags in play at the end to be resolved. Note that due to implementation details AdvantageDuration can not be set to 60 seconds. NewCTF will write a warning about this to the log and set AdvantageDuration to 59 automatically.  
 Can also be set through the URL using `?AdvantageDuration=X`.  
 See section [Advantage](#advantage).
+
+### MercyScore
+If MercyScore is greater than 0, and one team is at least one more than
+MercyScore ahead of their closest opponent, the game ends immediately.
+Can also be set through the URL using `?MercyScore=X`.
 
 ## Spawn System
 

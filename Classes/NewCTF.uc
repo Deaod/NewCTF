@@ -51,6 +51,10 @@ event InitGame(string Options, out string Error) {
     opt = ParseOption(Options, "AdvantageDuration");
     if (opt != "")
         AdvantageDuration = float(opt);
+
+    opt = ParseOption(Options, "MercyScore");
+    if (opt != "")
+        MercyScore = int(opt);
 }
 
 function InitSpawnSystem()

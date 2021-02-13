@@ -20,6 +20,9 @@ var(Overtime)    config bool bAllowOvertime;
 // Extra time if a flag is in play when the game ends, 0 for no limit
 // Never use the value 60, if you like the end-of-match countdown.
 var(Advantage)   config int  AdvantageDuration;
+// Maximum score difference between best team and second-best team.
+// If exceeded, game ends immediately.
+var(Game)        config int  MercyScore;
 
 const MaxNumSpawnPointsPerTeam = 16;
 const MaxNumTeams = 4;
@@ -171,6 +174,8 @@ function ScoreFlag(Pawn Scorer, CTFFlag F) {
 
     super.ScoreFlag(Scorer, F);
 
+    CheckMercy();
+
     if (bGameEnded || bAdvantage == false) return;
 
     ctfState = CTFReplicationInfo(GameReplicationInfo);
@@ -190,6 +195,44 @@ function ScoreFlag(Pawn Scorer, CTFFlag F) {
         bAdvantageDone = true;
         bAdvantage = false;
         EndGame("timelimit");
+    }
+}
+
+function CheckMercy() {
+    local int i;
+    local TeamInfo T[4];
+    local TeamInfo Temp;
+    local int Best;
+
+    if (MercyScore <= 0) return;
+
+    for (i = 0; i < MaxTeams; ++i)
+        T[i] = Teams[i];
+
+    Best = 0;
+    for (i = 1; i < MaxTeams; ++i)
+        if (T[i].Score > T[Best].Score)
+            Best = i;
+
+    if (Best != 0) {
+        Temp = T[0];
+        T[0] = T[Best];
+        T[Best] = Temp;
+    }
+
+    Best = 1;
+    for (i = 2; i < MaxTeams; ++i)
+        if (T[i].Score > T[Best].Score)
+            Best = i;
+
+    if (Best != 1) {
+        Temp = T[1];
+        T[1] = T[Best];
+        T[Best] = Temp;
+    }
+
+    if (T[0].Score - T[1].Score > MercyScore) {
+        EndGame("mercy");
     }
 }
 
@@ -455,6 +498,7 @@ defaultproperties
 
     bAllowOvertime=False
     AdvantageDuration=120
+    MercyScore=0
 
     GameName="New Capture the Flag"
 }

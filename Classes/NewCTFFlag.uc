@@ -101,6 +101,12 @@ auto state Home {
     }
 }
 
+function SetHolderLighting() {
+    super.SetHolderLighting();
+    Holder.LightType = LT_None;
+    Holder.AmbientGlow = Holder.default.AmbientGlow;
+}
+
 DefaultProperties
 {
     bAlwaysRelevant=True

@@ -31,6 +31,9 @@ var bool bAdvantageDone;
 var PlayerStart PlayerStartList[64];
 var int         TeamSpawnCount[4];
 
+var int HandledSpawns;
+var int OldSystemSpawns;
+
 event InitGame(string Options, out string Error) {
     local string opt;
 
@@ -269,6 +272,8 @@ function bool SetEndCams(string Reason) {
     }
     CalcEndStats();
 
+    Log(HandledSpawns@"respawns handled of which"@OldSystemSpawns@"("$int(100.0 * float(OldSystemSpawns) / float(HandledSpawns) + 0.5)$"%) fell back to default algorithm.", 'NewCTF');
+
     return true;
 }
 
@@ -416,6 +421,7 @@ function NavigationPoint FindPlayerStart(Pawn Player, optional byte InTeam, opti
     if (team >= MaxNumTeams || NumPlayers <= SpawnSystemThreshold)
        return super.FindPlayerStart(Player, InTeam, incomingName);
 
+    ++HandledSpawns;
     psOffset = team * MaxNumSpawnPointsPerTeam;
     for (i = 0; i < TeamSpawnCount[team] - SpawnMinCycleDistance; i++) {
         PS = PlayerStartList[psOffset + i];
@@ -433,6 +439,7 @@ function NavigationPoint FindPlayerStart(Pawn Player, optional byte InTeam, opti
         }
     }
 
+    ++OldSystemSpawns;
     return super.FindPlayerStart(Player, InTeam, incomingName);
 }
 

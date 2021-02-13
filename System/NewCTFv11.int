@@ -1,3 +1,0 @@
-[Public]
-Object=(Name=NewCTFv11.NewCTF,Class=Class,MetaClass=Botpack.TournamentGameInfo)
-Preferences=(Caption="NewCTF",Parent="Game Types",Class=NewCTFv11.NewCTF,Immediate=True)

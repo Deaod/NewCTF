@@ -70,6 +70,9 @@ SpawnFriendlyVisionBlockRange=150.0
 SpawnFlagBlockRange=750.0
 SpawnMinCycleDistance=1
 bAllowOvertime=False
+OvertimeRespawnDelay=1.0
+OvertimeRespawnDelayCoefficient=120.0
+OvertimeRespawnDelayStartTime=300
 AdvantageDuration=120
 MercyScore=0
 bFlagGlow=True
@@ -80,7 +83,18 @@ These settings will be explained in the [Spawn System](#spawn-system) section.
 
 ### bAllowOvertime
 Whether to allow a match to go into overtime, or to end the game in a draw.  
-Can also be set through the URL using `?bAllowOvertime=(true/false)`.
+Can also be set through the URL using `?bAllowOvertime=(true/false)`.  
+See also [Interaction with Overtime](#interaction-with-overtime).
+
+### OvertimeRespawnDelay
+After [OvertimeRespawnDelayStartTime](#overtimerespawndelaystarttime) seconds of overtime respawning is delayed by this many seconds (at least 1 second).
+
+### OvertimeRespawnDelayCoefficient
+Only applies if greater than `0.0`.  
+Every this many seconds of overtime past [OvertimeRespawnDelayStartTime](#overtimerespawndelaystarttime) respawning is delayed by one additional second.
+
+### OvertimeRespawnDelayStartTime
+After this many seconds of overtime, respawning could be delayed by more than normal, depending on [OvertimeRespawnDelay](#overtimerespawndelay) and [OvertimeRespawnDelayCoefficient](#overtimerespawndelaycoefficient).
 
 ### AdvantageDuration
 How much time (in seconds) to add on top of the regular time to allow flags in play at the end to be resolved. Note that due to implementation details AdvantageDuration can not be set to 60 seconds. NewCTF will write a warning about this to the log and set AdvantageDuration to 59 automatically.  

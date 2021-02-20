@@ -15,22 +15,33 @@ var(SpawnSystem) config float SpawnFlagBlockRange;
 // Minimum number of spawn points to cycle through before reusing one
 var(SpawnSystem) config int SpawnMinCycleDistance;
 
-// True results in default behavior, False activates an advantage system
-var(Game) config bool bAllowOvertime;
+// True results in default behavior, False activates an advantage system.
+var(Game) config bool  bAllowOvertime;
+// This is the RespawnDelay after OvertimeRespawnDelayStartTime seconds of
+// overtime.
+var(Game) config float OvertimeRespawnDelay;
+// Every this many seconds of overtime past OvertimeRespawnDelayStartTime
+// spawns are delayed by one second.
+// Set to zero or less to not increase RespawnDelay past OvertimeRespawnDelay.
+var(Game) config float OvertimeRespawnDelayCoefficient;
+// Only start delaying respawns after this many seconds of overtime.
+var(Game) config int   OvertimeRespawnDelayStartTime;
 // Extra time if a flag is in play when the game ends, 0 for no limit
 // Never use the value 60, if you like the end-of-match countdown.
-var(Game) config int  AdvantageDuration;
+var(Game) config int   AdvantageDuration;
 // Maximum score difference between best team and second-best team.
 // If exceeded, game ends immediately.
-var(Game) config int  MercyScore;
+var(Game) config int   MercyScore;
 // Whether flags glow when held by players.
-var(Game) config bool bFlagGlow;
+var(Game) config bool  bFlagGlow;
 
 const MaxNumSpawnPointsPerTeam = 16;
 const MaxNumTeams = 4;
 
 var bool bAdvantage;
 var bool bAdvantageDone;
+
+var int OvertimeOffset;
 
 // size of array should be the result of MaxNumTeams*MaxNumSpawnPointsPerTeam
 var PlayerStart PlayerStartList[64];
@@ -339,6 +350,7 @@ function EndGame(string reason) {
                 class'NewCTFMessages',
                 5, // Overtime
             );
+            OvertimeOffset = GameReplicationInfo.ElapsedTime;
             return;
         }
 
@@ -372,6 +384,25 @@ function EndGame(string reason) {
     }
 
     super.EndGame(reason); // Super is GameInfo
+}
+
+function ScoreKill(Pawn Killer, Pawn Other) {
+    local int Overtime;
+    local float RespawnDelay;
+
+    super.ScoreKill(Killer, Other);
+
+    if (bOverTime) {
+        Overtime = GameReplicationInfo.ElapsedTime - OvertimeOffset;
+        if (Overtime < OvertimeRespawnDelayStartTime)
+            return;
+
+        RespawnDelay = OvertimeRespawnDelay;
+        if (OvertimeRespawnDelayCoefficient > 0.0)
+            RespawnDelay += (Overtime - OvertimeRespawnDelayStartTime) / OvertimeRespawnDelayCoefficient;
+
+        Other.SetPropertyText("RespawnDelay", string(FMax(1.0, RespawnDelay))); // dont go below default RespawnDelay
+    }
 }
 
 function Timer() {
@@ -507,6 +538,9 @@ defaultproperties
     SpawnMinCycleDistance=1
 
     bAllowOvertime=False
+    OvertimeRespawnDelay=1.0
+    OvertimeRespawnDelayCoefficient=120.0
+    OvertimeRespawnDelayStartTime=300
     AdvantageDuration=120
     MercyScore=0
     bFlagGlow=True

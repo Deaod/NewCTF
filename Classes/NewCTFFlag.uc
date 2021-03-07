@@ -126,4 +126,5 @@ function SetHolderLighting() {
 DefaultProperties
 {
     bAlwaysRelevant=True
+    RemoteRole=ROLE_SimulatedProxy
 }

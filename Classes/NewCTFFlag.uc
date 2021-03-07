@@ -101,6 +101,16 @@ auto state Home {
     }
 }
 
+state Dropped {
+    function BeginState() {
+        LightEffect = LE_NonIncidence;
+        SetTimer(NewCTF(Level.Game).GetFlagTimeout(), false);
+        bCollideWorld = true;
+        bKnownLocation = false;
+        bHidden = false;
+    }
+}
+
 function SetHolderLighting() {
     local NewCTF G;
 

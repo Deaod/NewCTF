@@ -5,6 +5,9 @@ Enhanced CTF Gamemode for UnrealTournament. It adds the following features compa
 * Announcer for flag events (Taken/Dropped/Returned/Captured), plus a few other events
 * Advantage system to allow flags in play at the end of a match to be resolved, within a limited amount of time
 * Option to not play overtime and instead have draws
+* Option to increase respawn delay during overtime, to force the game to end
+* Option to remove the light-glow around flag-carriers
+* Adjustable flag timeout when dropped
 
 ## Installation
 
@@ -76,6 +79,9 @@ OvertimeRespawnDelayStartTime=300
 AdvantageDuration=120
 MercyScore=0
 bFlagGlow=True
+FlagTimeout=25.0
+FlagAdvantageTimeout=25.0
+FlagOvertimeTimeout=25.0
 ```
 
 ### Spawn*
@@ -109,6 +115,15 @@ Can also be set through the URL using `?MercyScore=X`.
 ### bFlagGlow
 Controls whether flags glow when being carried by players.  
 Can also be set through the URL using `bFlagGlow=(True/False)`.
+
+### FlagTimeout
+Controls how long a flag stays on the ground before being returned automatically. This variable controls the Timeout during normal play.
+
+### FlagTimeoutAdvantage
+Controls how long a flag stays on the ground before being returned automatically during advantage.
+
+### FlagTimeoutOvertime
+Controls how long a flag stays on the ground before being returned automatically during overtime.
 
 ## Spawn System
 

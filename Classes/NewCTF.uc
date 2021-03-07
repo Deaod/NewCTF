@@ -34,6 +34,12 @@ var(Game) config int   AdvantageDuration;
 var(Game) config int   MercyScore;
 // Whether flags glow when held by players.
 var(Game) config bool  bFlagGlow;
+// How long the flag will remain on the ground during the match
+var(Game) config float FlagTimeout;
+// How long the flag will remain on the ground during advantage
+var(Game) config float FlagTimeoutAdvantage;
+// How long the flag will remain on the ground during overtime
+var(Game) config float FlagTimeoutOvertime;
 
 const MaxNumSpawnPointsPerTeam = 16;
 const MaxNumTeams = 4;
@@ -527,6 +533,15 @@ function NavigationPoint FindPlayerStart(Pawn Player, optional byte InTeam, opti
     return super.FindPlayerStart(Player, InTeam, incomingName);
 }
 
+function float GetFlagTimeout() {
+    if (bOverTime)
+        return FlagTimeoutOvertime;
+    else if (bAdvantage)
+        return FlagTimeoutAdvantage;
+
+    return FlagTimeout;
+}
+
 defaultproperties
 {
     SpawnSystemThreshold=4
@@ -544,6 +559,9 @@ defaultproperties
     AdvantageDuration=120
     MercyScore=0
     bFlagGlow=True
+    FlagTimeout=25.0
+    FlagTimeoutAdvantage=25.0
+    FlagTimeoutOvertime=25.0
 
     GameName="New Capture the Flag"
 }

@@ -360,7 +360,7 @@ function EndGame(string reason) {
             return;
         }
 
-        if (bAdvantageDone == false && bAdvantage == false && IsEveryFlagHome() == false) {
+        if (bAdvantageDone == false && bAdvantage == false && IsEveryFlagHome() == false && AdvantageDuration > 0) {
             bAdvantage = true;
             RemainingTime = AdvantageDuration;
             // Youre probably wondering why the value 60 cant be used. Well, its

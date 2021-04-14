@@ -52,6 +52,9 @@ function Drop(vector newVel) {
 state Held {
     function BeginState() {
         local Pawn P;
+        local CTFFlag OwnFlag;
+        local vector Delta;
+
         super.BeginState();
 
         BroadcastLocalizedMessage(
@@ -74,6 +77,18 @@ state Held {
             class'CTFMessage2',
             0
         );
+
+        if (Level.Game.IsA('CTFGame')) {
+            OwnFlag = CTFReplicationInfo(Level.Game.GameReplicationInfo).FlagList[Holder.PlayerReplicationInfo.Team];
+            if (OwnFlag != none && OwnFlag.bHome && OwnFlag.HomeBase != none) {
+                Delta = Holder.Location - OwnFlag.Location;
+                if (VSize(Delta * vect(1,1,0)) <= Holder.CollisionRadius + OwnFlag.HomeBase.CollisionRadius &&
+                    Abs(Delta.Z) <= Holder.CollisionHeight + OwnFlag.HomeBase.CollisionHeight
+                ) {
+                    OwnFlag.Touch(Holder);
+                }
+            }
+        }
     }
 }
 

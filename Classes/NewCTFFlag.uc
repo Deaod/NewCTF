@@ -21,7 +21,7 @@ function SendHome() {
 
     super.SendHome();
 
-    if (HomeBase != none) {
+    if (HomeBase != none && Level.Game.GameReplicationInfo.GameEndedComments == "") {
         for (P = Level.PawnList; P != none; P = P.NextPawn) {
             D = P.Location - Location;
             if (Spectator(P) != none)

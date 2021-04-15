@@ -24,7 +24,7 @@ function SendHome() {
     if (HomeBase != none && Level.Game.GameReplicationInfo.GameEndedComments == "") {
         for (P = Level.PawnList; P != none; P = P.NextPawn) {
             D = P.Location - Location;
-            if (Spectator(P) != none)
+            if (P.IsA('Spectator') || P.bCollideActors == false)
                 continue;
             if (VSize(D * vect(1,1,0)) < P.CollisionRadius + CollisionRadius && Abs(D.Z) < P.CollisionHeight + CollisionHeight) {
                 Touch(P);

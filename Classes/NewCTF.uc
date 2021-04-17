@@ -530,6 +530,12 @@ function NavigationPoint FindPlayerStart(Pawn Player, optional byte InTeam, opti
     }
 
     ++OldSystemSpawns;
+    if (Player.PlayerReplicationInfo != none) {
+        Log("["$Level.TimeSeconds$"]"@Player.PlayerReplicationInfo.PlayerName@"spawned using default algorithm");
+        if (Player.IsA('PlayerPawn')) {
+            PlayerPawn(Player).ClientMessage("Used default algorithm to spawn");
+        }
+    }
     return super.FindPlayerStart(Player, InTeam, incomingName);
 }
 

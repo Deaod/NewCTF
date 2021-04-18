@@ -440,7 +440,7 @@ function bool IsFriendOfTeam(Pawn P, byte team)
     return (P.PlayerReplicationInfo.Team == team);
 }
 
-function bool IsPlayerStartViable(PlayerStart PS)
+function bool IsPlayerStartViable(PlayerStart PS, out byte ExclusionReason)
 {
     local Pawn P;
     local CTFFlag F;
@@ -475,14 +475,16 @@ function bool IsPlayerStartViable(PlayerStart PS)
         visible = PS.FastTrace(P.Location + eyeHeight);
         distance = VSize(PS.Location - P.Location + eyeHeight);
 
-        if ( enemy &&  visible && distance <= EVBR) return false;
-        if ( enemy && !visible && distance <= EBR)  return false;
-        if (friend &&  visible && distance <= FVBR) return false;
-        if (friend && !visible && distance <= FBR)  return false;
+        if ( enemy &&  visible && distance <= EVBR) { ExclusionReason = 1; return false; }
+        if ( enemy && !visible && distance <= EBR)  { ExclusionReason = 2; return false; }
+        if (friend &&  visible && distance <= FVBR) { ExclusionReason = 3; return false; }
+        if (friend && !visible && distance <= FBR)  { ExclusionReason = 4; return false; }
     }
 
-    foreach PS.RadiusActors(class'CTFFlag', F, FlagBR)
+    foreach PS.RadiusActors(class'CTFFlag', F, FlagBR) {
+        ExclusionReason = 5;
         return false;
+    }
 
     return true;
 }
@@ -495,6 +497,7 @@ function NavigationPoint FindPlayerStart(Pawn Player, optional byte InTeam, opti
     local int psOffset;
     local PlayerStart PS;
     local Teleporter Tel;
+    local byte ExclusionReason[16];
 
     // The following is copied from TeamGamePlus
     if ((Player != None) && (Player.PlayerReplicationInfo != None))
@@ -516,7 +519,7 @@ function NavigationPoint FindPlayerStart(Pawn Player, optional byte InTeam, opti
     for (i = 0; i < TeamSpawnCount[team] - SpawnMinCycleDistance; i++) {
         PS = PlayerStartList[psOffset + i];
 
-        if (IsPlayerStartViable(PS)) {
+        if (IsPlayerStartViable(PS, ExclusionReason[i])) {
             end = TeamSpawnCount[team] - 1;
             while (i < end) {
                 PlayerStartList[psOffset + i] = PlayerStartList[psOffset + i + 1];
@@ -529,14 +532,34 @@ function NavigationPoint FindPlayerStart(Pawn Player, optional byte InTeam, opti
         }
     }
 
+    while (i < TeamSpawnCount[team]) {
+        ExclusionReason[i] = 6;
+        i++;
+    }
+
     ++OldSystemSpawns;
     if (Player.PlayerReplicationInfo != none) {
         Log("["$Level.TimeSeconds$"]"@Player.PlayerReplicationInfo.PlayerName@"spawned using default algorithm");
+        for (i = 0; i < TeamSpawnCount[team]; ++i) {
+            Log(PlayerStartList[psOffset + i]$":"@ExclusionReasonToString(ExclusionReason[i]));
+        }
         if (Player.IsA('PlayerPawn')) {
             PlayerPawn(Player).ClientMessage("Used default algorithm to spawn");
         }
     }
     return super.FindPlayerStart(Player, InTeam, incomingName);
+}
+
+function string ExclusionReasonToString(byte Reason) {
+    switch(Reason) {
+        case 1: return "EnemyVisionBlockRange";
+        case 2: return "EnemyBlockRange";
+        case 3: return "FriendlyVisionBlockRange";
+        case 4: return "FriendlyBlockRange";
+        case 5: return "FlagBlockRange";
+        case 6: return "RecentlyUsed";
+    }
+    return "Unknown";
 }
 
 function float GetFlagTimeout() {

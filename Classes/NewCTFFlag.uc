@@ -26,7 +26,7 @@ function SendHome() {
             D = P.Location - Location;
             if (P.IsA('Spectator') || P.bCollideActors == false)
                 continue;
-            if (VSize(D * vect(1,1,0)) < P.CollisionRadius + CollisionRadius && Abs(D.Z) < P.CollisionHeight + CollisionHeight) {
+            if (VSize(D * vect(1,1,0)) <= P.CollisionRadius + CollisionRadius && Abs(D.Z) <= P.CollisionHeight + CollisionHeight) {
                 Touch(P);
             }
         }

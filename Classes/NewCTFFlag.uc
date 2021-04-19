@@ -66,7 +66,7 @@ state Held {
         );
 
         for(P = Level.PawnList; P != none; P = P.NextPawn)
-            if (P.PlayerReplicationInfo.Team == Team)
+            if (P.PlayerReplicationInfo != none && P.PlayerReplicationInfo.Team == Team)
                 P.ReceiveLocalizedMessage(class'CTFMessage2', 1);
 
         Holder.ReceiveLocalizedMessage(

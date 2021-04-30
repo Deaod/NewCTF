@@ -427,7 +427,8 @@ function Timer() {
 function bool IsParticipant(Pawn P) {
     return (P.PlayerReplicationInfo != none)
         && (P.Health > 0)
-        && (P.IsA('Spectator') == false);
+        && (P.IsA('Spectator') == false)
+        && (P.bCollideActors);
 }
 
 function bool IsEnemyOfTeam(Pawn P, byte team)

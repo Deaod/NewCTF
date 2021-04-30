@@ -500,6 +500,11 @@ function NavigationPoint FindPlayerStart(Pawn Player, optional byte InTeam, opti
     local byte ExclusionReason[16];
 
     // The following is copied from TeamGamePlus
+    if ( bStartMatch && (Player != None) && Player.IsA('TournamentPlayer')
+        && (Level.NetMode == NM_Standalone)
+        && (TournamentPlayer(Player).StartSpot != None) )
+        return TournamentPlayer(Player).StartSpot;
+
     if ((Player != None) && (Player.PlayerReplicationInfo != None))
         team = Player.PlayerReplicationInfo.Team;
     else

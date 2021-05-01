@@ -152,28 +152,25 @@ function InitFlags() {
         FB.TakenSound = FBAlarm;
         FB.NetUpdateFrequency = 20.0;
 
-        F = FB.Spawn(class'NewCTFFlag');
-        F.HomeBase = FB;
-        F.Team = FB.Team;
-        ctfState.FlagList[FB.Team] = F;
-
         switch(F.Team) {
         case TEAM_Red:
-            F.LightHue = 0;
-            F.Skin = texture'Botpack.Skins.JpflagR';
+            F = FB.Spawn(class'NewCTFFlagRed');
             break;
         case TEAM_Blue:
-            F.LightHue = 170;
-            F.Skin = texture'Botpack.Skins.JpflagB';
+            F = FB.Spawn(class'NewCTFFlagBlue');
             break;
         case TEAM_Green:
-            F.LightHue = 80;
-            F.Skin = none;//texture'Botpack.Skins.JFlag13'; // doesnt exist
+            F = FB.Spawn(class'NewCTFFlagGreen');
             break;
         case TEAM_Gold:
-            F.LightHue = 32;
-            F.Skin = none;//texture'Botpack.Skins.JFlag14'; // doesnt exist
+            F = FB.Spawn(class'NewCTFFlagGold');
             break;
+        }
+
+        if (F != none) {
+            F.HomeBase = FB;
+            F.Team = FB.Team;
+            ctfState.FlagList[FB.Team] = F;
         }
     }
 }

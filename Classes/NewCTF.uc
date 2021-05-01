@@ -143,15 +143,6 @@ function InitFlags() {
         FBAlarm = FB.TakenSound;
         FB.TakenSound = none; // first, make sure we dont get annoying sounds
 
-        oldF = ctfState.FlagList[FB.Team];
-        oldF.GoToState('Held'); // next, transition flag out of state Home right now
-        oldF.SetTimer(0.0, false); // disable the timer of state Held
-        oldF.Destroy(); // now we can safetly destroy the old flag
-
-        FB.bHidden = false; // fix the FlagBase
-        FB.TakenSound = FBAlarm;
-        FB.NetUpdateFrequency = 20.0;
-
         switch(F.Team) {
         case TEAM_Red:
             F = FB.Spawn(class'NewCTFFlagRed');
@@ -170,8 +161,18 @@ function InitFlags() {
         if (F != none) {
             F.HomeBase = FB;
             F.Team = FB.Team;
+
+            oldF = ctfState.FlagList[FB.Team];
+            oldF.GoToState('Held'); // next, transition flag out of state Home right now
+            oldF.SetTimer(0.0, false); // disable the timer of state Held
+            oldF.Destroy(); // now we can safetly destroy the old flag
+
             ctfState.FlagList[FB.Team] = F;
         }
+
+        FB.bHidden = false; // fix the FlagBase
+        FB.TakenSound = FBAlarm;
+        FB.NetUpdateFrequency = 20.0;
     }
 }
 

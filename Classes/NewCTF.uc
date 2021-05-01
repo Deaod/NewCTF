@@ -143,7 +143,7 @@ function InitFlags() {
         FBAlarm = FB.TakenSound;
         FB.TakenSound = none; // first, make sure we dont get annoying sounds
 
-        switch(F.Team) {
+        switch(FB.Team) {
         case TEAM_Red:
             F = FB.Spawn(class'NewCTFFlagRed');
             break;

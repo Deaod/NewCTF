@@ -141,4 +141,5 @@ function SetHolderLighting() {
 DefaultProperties
 {
     bAlwaysRelevant=True
+    bSimFall=True
 }

@@ -439,12 +439,18 @@ function bool IsFriendOfTeam(Pawn P, byte team)
     return (P.PlayerReplicationInfo.Team == team);
 }
 
+function bool IsCarryingFlag(Pawn P)
+{
+    return (P.PlayerReplicationInfo.HasFlag != none)
+        && (P.PlayerReplicationInfo.HasFlag.IsA('NewCTFFlag'));
+}
+
 function bool IsPlayerStartViable(PlayerStart PS, out byte ExclusionReason)
 {
     local Pawn P;
     local CTFFlag F;
     local bool visible;
-    local bool enemy, friend;
+    local bool enemy, friend, carrier;
     local float distance;
     local vector eyeHeight;
     local float EBR, EVBR, FBR, FVBR, FlagBR;
@@ -469,19 +475,21 @@ function bool IsPlayerStartViable(PlayerStart PS, out byte ExclusionReason)
         if (IsParticipant(P) == false) continue;
         enemy = IsEnemyOfTeam(P, PS.TeamNumber);
         friend = IsFriendOfTeam(P, PS.TeamNumber);
+        carrier = IsCarryingFlag(P);
 
         eyeHeight.Z = P.BaseEyeHeight;
         visible = PS.FastTrace(P.Location + eyeHeight);
         distance = VSize(PS.Location - P.Location + eyeHeight);
 
-        if ( enemy &&  visible && distance <= EVBR) { ExclusionReason = 1; return false; }
-        if ( enemy && !visible && distance <= EBR)  { ExclusionReason = 2; return false; }
-        if (friend &&  visible && distance <= FVBR) { ExclusionReason = 3; return false; }
-        if (friend && !visible && distance <= FBR)  { ExclusionReason = 4; return false; }
+        if ( enemy &&  visible && distance <= EVBR)   { ExclusionReason = 1; return false; }
+        if ( enemy && !visible && distance <= EBR)    { ExclusionReason = 2; return false; }
+        if (friend &&  visible && distance <= FVBR)   { ExclusionReason = 3; return false; }
+        if (friend && !visible && distance <= FBR)    { ExclusionReason = 4; return false; }
+        if ( enemy &&  carrier && distance <= FlagBR) { ExclusionReason = 5; return false; }
     }
 
     foreach PS.RadiusActors(class'CTFFlag', F, FlagBR) {
-        ExclusionReason = 5;
+        ExclusionReason = 6;
         return false;
     }
 
@@ -538,7 +546,7 @@ function NavigationPoint FindPlayerStart(Pawn Player, optional byte InTeam, opti
     }
 
     while (i < TeamSpawnCount[team]) {
-        ExclusionReason[i] = 6;
+        ExclusionReason[i] = 7;
         i++;
     }
 
@@ -561,8 +569,9 @@ function string ExclusionReasonToString(byte Reason) {
         case 2: return "EnemyBlockRange";
         case 3: return "FriendlyVisionBlockRange";
         case 4: return "FriendlyBlockRange";
-        case 5: return "FlagBlockRange";
-        case 6: return "RecentlyUsed";
+        case 5: return "CarrierInRange";
+        case 6: return "FlagBlockRange";
+        case 7: return "RecentlyUsed";
     }
     return "Unknown";
 }

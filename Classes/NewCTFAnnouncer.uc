@@ -1,4 +1,4 @@
-class NewCTFAnnouncer extends Actor;
+class NewCTFAnnouncer extends INewCTFAnnouncer;
 
 #exec AUDIO IMPORT FILE="Sounds/Red_Flag_Dropped.wav" NAME="RedFlagDropped"
 #exec AUDIO IMPORT FILE="Sounds/Red_Flag_Returned.wav" NAME="RedFlagReturned"
@@ -17,52 +17,6 @@ class NewCTFAnnouncer extends Actor;
 #exec AUDIO IMPORT FILE="Sounds/advantage.wav" name="AdvantageGeneric"
 
 const QueueSize = 16;
-const MaxSlots = 4;
-const MaxNumTeams = 4;
-
-enum AnnouncementCondition {
-    // play for everyone
-    ANNC_All,
-    // only play for matching team
-    ANNC_Team,
-    // dont play for matching team
-    ANNC_NotTeam
-};
-
-enum AnnouncementSection {
-    // Play on General
-    ANNS_General,
-    // Play on Team-specific
-    ANNS_Team
-};
-
-struct AnnouncementSlot {
-    // The sounds to play
-    var() sound Snd;
-    //
-    var() AnnouncementCondition Cond;
-    // The volume individual sounds play at is AnnouncerVolume * (1 + VolAdj) for each sound
-    var() float VolAdj;
-    //
-    var() AnnouncementSection Section;
-};
-
-struct AnnouncementContent {
-    // The sounds to play
-    var() AnnouncementSlot Slots[4]; // MaxSlots
-    // This is the length of time where this announcement plays without any other announcements
-    var() float Duration;
-};
-
-// Sounds that should be replaced
-var() AnnouncementContent FlagDropped[4];
-var() AnnouncementContent FlagReturned[4];
-var() AnnouncementContent FlagTaken[4];
-var() AnnouncementContent FlagScored[4];
-var() AnnouncementContent Overtime;
-var() AnnouncementContent AdvantageGeneric;
-var() AnnouncementContent Draw;
-var() AnnouncementContent GotFlag;
 
 // Internal variables to make announcements overlap less
 struct Announcement {
@@ -71,11 +25,12 @@ struct Announcement {
 };
 
 var PlayerPawn LocalPlayer;
-var Announcement AnnouncementQueue[16]; // QueueSize
-var AnnouncementPlayer Team[4];
+var Announcement AnnouncementQueue[QueueSize]; // QueueSize
+var AnnouncementPlayer Team[MaxNumTeams];
 var AnnouncementPlayer General;
 var bool AnnouncementPlaying;
 var float AnnouncerVolume;
+var class<INewCTFAnnouncer> AnnouncerClass;
 
 function AnnouncementContent GetAnnouncementContent(byte Ann, optional byte Team) {
     local AnnouncementContent Def;
@@ -102,43 +57,43 @@ function AnnouncementContent GetAnnouncementContent(byte Ann, optional byte Team
     return Def;
 }
 
-event Spawned() {
-    FlagDropped[0].Slots[0].Snd = sound'RedFlagDropped';
-    FlagDropped[0].Slots[0].Section = ANNS_Team;
-    FlagDropped[0].Duration = 0;
-    FlagDropped[1].Slots[0].Snd = sound'BlueFlagDropped';
-    FlagDropped[1].Slots[0].Section = ANNS_Team;
-    FlagDropped[1].Duration = 0;
+static function InitAnnouncements(INewCTFAnnouncer Announcer) {
+    Announcer.FlagDropped[0].Slots[0].Snd = sound'RedFlagDropped';
+    Announcer.FlagDropped[0].Slots[0].Section = ANNS_Team;
+    Announcer.FlagDropped[0].Duration = 0;
+    Announcer.FlagDropped[1].Slots[0].Snd = sound'BlueFlagDropped';
+    Announcer.FlagDropped[1].Slots[0].Section = ANNS_Team;
+    Announcer.FlagDropped[1].Duration = 0;
 
-    FlagReturned[0].Slots[0].Snd = sound'RedFlagReturned';
-    FlagReturned[0].Slots[0].Section = ANNS_Team;
-    FlagReturned[0].Duration = 0;
-    FlagReturned[1].Slots[0].Snd = sound'BlueFlagReturned';
-    FlagReturned[1].Slots[0].Section = ANNS_Team;
-    FlagReturned[1].Duration = 0;
+    Announcer.FlagReturned[0].Slots[0].Snd = sound'RedFlagReturned';
+    Announcer.FlagReturned[0].Slots[0].Section = ANNS_Team;
+    Announcer.FlagReturned[0].Duration = 0;
+    Announcer.FlagReturned[1].Slots[0].Snd = sound'BlueFlagReturned';
+    Announcer.FlagReturned[1].Slots[0].Section = ANNS_Team;
+    Announcer.FlagReturned[1].Duration = 0;
 
-    FlagTaken[0].Slots[0].Snd = sound'RedFlagTaken';
-    FlagTaken[0].Slots[0].Section = ANNS_Team;
-    FlagTaken[0].Duration = 0;
-    FlagTaken[1].Slots[0].Snd = sound'BlueFlagTaken';
-    FlagTaken[1].Slots[0].Section = ANNS_Team;
-    FlagTaken[1].Duration = 0;
+    Announcer.FlagTaken[0].Slots[0].Snd = sound'RedFlagTaken';
+    Announcer.FlagTaken[0].Slots[0].Section = ANNS_Team;
+    Announcer.FlagTaken[0].Duration = 0;
+    Announcer.FlagTaken[1].Slots[0].Snd = sound'BlueFlagTaken';
+    Announcer.FlagTaken[1].Slots[0].Section = ANNS_Team;
+    Announcer.FlagTaken[1].Duration = 0;
 
-    FlagScored[0].Slots[0].Snd = sound'RedTeamScores';
-    FlagScored[0].Slots[0].Section = ANNS_Team;
-    FlagScored[0].Duration = 0;
-    FlagScored[1].Slots[0].Snd = sound'BlueTeamScores';
-    FlagScored[1].Slots[0].Section = ANNS_Team;
-    FlagScored[1].Duration = 0;
+    Announcer.FlagScored[0].Slots[0].Snd = sound'RedTeamScores';
+    Announcer.FlagScored[0].Slots[0].Section = ANNS_Team;
+    Announcer.FlagScored[0].Duration = 0;
+    Announcer.FlagScored[1].Slots[0].Snd = sound'BlueTeamScores';
+    Announcer.FlagScored[1].Slots[0].Section = ANNS_Team;
+    Announcer.FlagScored[1].Duration = 0;
 
-    Overtime.Slots[0].Snd = sound'Overtime';
-    Overtime.Duration = 0;
-    AdvantageGeneric.Slots[0].Snd = sound'AdvantageGeneric';
-    AdvantageGeneric.Duration = 0;
-    Draw.Slots[0].Snd = sound'Draw';
-    Draw.Duration = 0;
-    GotFlag.Slots[0].Snd = sound'GotFlag';
-    GotFlag.Duration = 0;
+    Announcer.Overtime.Slots[0].Snd = sound'Overtime';
+    Announcer.Overtime.Duration = 0;
+    Announcer.AdvantageGeneric.Slots[0].Snd = sound'AdvantageGeneric';
+    Announcer.AdvantageGeneric.Duration = 0;
+    Announcer.Draw.Slots[0].Snd = sound'Draw';
+    Announcer.Draw.Duration = 0;
+    Announcer.GotFlag.Slots[0].Snd = sound'GotFlag';
+    Announcer.GotFlag.Duration = 0;
 }
 
 function InitSections() {
@@ -157,9 +112,10 @@ function InitSections() {
 
 function InitAnnouncer() {
     InitSections();
+    AnnouncerClass.static.InitAnnouncements(self);
 }
 
-function bool CanPlayAnnouncement(PlayerPawn P, byte Team, AnnouncementCondition ACond) {
+function bool CanPlayAnnouncement(PlayerPawn P, byte Team, EAnnouncementCondition ACond) {
     switch (ACond) {
         case ANNC_All:
             return true;
@@ -217,7 +173,7 @@ function PlayAnnouncementSound(
     }
 }
 
-function AnnouncementPlayer GetAnnouncementPlayer(AnnouncementSection AS, byte T) {
+function AnnouncementPlayer GetAnnouncementPlayer(EAnnouncementSection AS, byte T) {
     switch(AS) {
         case ANNS_General:
             return General;

@@ -79,7 +79,7 @@ static function PlayerPawn GetLocalPlayer(actor Ctx) {
 
 static function CreateAnnouncer(actor Ctx, PlayerPawn LP) {
     local PlayerPawn P;
-    local class<NewCTFAnnouncer> C;
+    local class<INewCTFAnnouncer> C;
 
     P = LP;
     if (P == none) {
@@ -87,14 +87,16 @@ static function CreateAnnouncer(actor Ctx, PlayerPawn LP) {
         if (P == none) return;
     }
 
-    C = class<NewCTFAnnouncer>(DynamicLoadObject(default.Settings.CTFAnnouncerClass, class'class'));
-    if (C == none) return;
+    C = class<INewCTFAnnouncer>(DynamicLoadObject(default.Settings.CTFAnnouncerClass, class'class'));
+    if (C == none)
+        C = class'NewCTFAnnouncer';
 
-    default.Announcer = P.Spawn(C);
+    default.Announcer = P.Spawn(class'NewCTFAnnouncer', P);
     if (default.Announcer == none) return;
 
     default.Announcer.LocalPlayer = P;
     default.Announcer.AnnouncerVolume = default.Settings.AnnouncerVolume;
+    default.Announcer.AnnouncerClass = C;
     default.Announcer.InitAnnouncer();
 }
 

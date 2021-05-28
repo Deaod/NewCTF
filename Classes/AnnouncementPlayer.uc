@@ -2,7 +2,6 @@ class AnnouncementPlayer extends Actor;
 
 defaultproperties
 {
-    bHidden=True
     CollisionRadius=0
     CollisionHeight=0
     bCollideActors=False

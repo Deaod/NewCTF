@@ -14,6 +14,8 @@ for /f "delims=" %%X IN ('dir /B /A /S *') DO (
 :FoundPkgName
 pushd ..\System
 
+if exist "CheckDependencies.bat" call "CheckDependencies.bat"
+
 :: make sure to always rebuild the package
 :: New package GUID, No doubts about staleness
 del %PACKAGE_NAME%.u

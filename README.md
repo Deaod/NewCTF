@@ -190,5 +190,4 @@ The game might first go into Advantage, then into Overtime if the resolution of 
 
 ## Building
 1. Open a command line window, go to your UnrealTournament installation folder and clone this repository using `git clone https://github.com/Deaod/NewCTF.git NewCTFv13`
-2. Before the first build, copy NewCTFInterface.u from the System folder in this repository to the System folder of your UnrealTournament installation
-3. Use build.bat to build a new NewCTFv13.u, which will also be copied to the System folder of this repository
+2. Use build.bat to build a new NewCTFv13.u, which will also be copied to the System folder of this repository

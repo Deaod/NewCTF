@@ -1,4 +1,4 @@
-/System/**/NewCTF*.u*
+/System/**/NewCTFv*.u*
 
 PostBuildHook.bat
 

@@ -54,6 +54,9 @@ Only provides custom sounds for Overtime, Advantage, and Draw, which would not h
 #### NewCTFv13.NewCTFAnnouncer
 Provides sounds for all events.
 
+#### Interface
+If you want to create your own Announcer package for NewCTF, create a new package containing a class that extends `INewCTFAnnouncer` from the [NewCTFInterface](https://github.com/Deaod/NewCTFInterface) package. Then set `CTFAnnouncerClass` to the name of your new package followed by a dot, followed by the name of the class.
+
 ### Debug
 Setting this to true causes NewCTF to log all incoming announcement notifications.
 
@@ -165,12 +168,12 @@ Specifies the range within which a Flag will block a spawn from being used, rega
 #### SpawnMinCycleDistance
 Specifies the number of other spawn points that have to have been used before a given spawn point can be used again. Setting it to 0 disables this restriction.
 
-### SpawnControl
-SpawnControl is a tiny add-on for map makers that allows them to provide alternate spawn system settings for a single map.
+### Interface
+NewCTFInterface contains an add-on for map makers that allows them to provide alternate spawn system settings for a single map.
 
-For this purpose SpawnControl contains two placeable actors, `SpawnControlInfo` and `SpawnControlPlayerStart`.
+For this purpose NewCTFInterface contains two placeable actors, `SpawnControlInfo` and `SpawnControlPlayerStart`.
 
-In order to use it, place the file SpawnControl.u in your System folder and add `EditPackages=SpawnControl` to section `[Editor.EditorEngine]` in UnrealTournament.ini.
+In order to use it, place the file NewCTFInterface.u in your System folder and add `EditPackages=NewCTFInterface` to section `[Editor.EditorEngine]` in UnrealTournament.ini.
 
 #### SpawnControlInfo
 Can be placed anywhere on the map, is invisible and contains alternate settings for the entire map.
@@ -187,5 +190,5 @@ The game might first go into Advantage, then into Overtime if the resolution of 
 
 ## Building
 1. Open a command line window, go to your UnrealTournament installation folder and clone this repository using `git clone https://github.com/Deaod/NewCTF.git NewCTFv13`
-2. Before the first build, copy SpawnControl.u from the System folder in this repository to the System folder of your UnrealTournament installation
+2. Before the first build, copy NewCTFInterface.u from the System folder in this repository to the System folder of your UnrealTournament installation
 3. Use build.bat to build a new NewCTFv13.u, which will also be copied to the System folder of this repository

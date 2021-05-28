@@ -310,6 +310,22 @@ function PlayerPawn GetLocalPlayer() {
     return LocalPlayer;
 }
 
+event Tick(float DeltaTime) {
+    local PlayerPawn P;
+    local Actor ViewActor;
+    local vector CameraLocation;
+    local rotator CameraRotation;
+    local int i;
+
+    P = GetLocalPlayer();
+    if (P == none) return;
+
+    P.PlayerCalcView(ViewActor, CameraLocation, CameraRotation);
+    General.SetLocation(CameraLocation);
+    for (i = 0; i < MaxNumTeams; i++)
+        Team[i].SetLocation(CameraLocation);
+}
+
 
 defaultproperties
 {

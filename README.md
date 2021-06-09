@@ -11,13 +11,8 @@ Enhanced CTF Gamemode for UnrealTournament. It adds the following features compa
 
 ## Installation
 
-1. Copy NewCTFv13.u and SpawnControl.u into System folder
-2. Add to `ServerPackage`s:  
-```
-ServerPackage=SpawnControl
-ServerPackage=NewCTFv13
-```
-3. Set Gamemode to NewCTFv13.NewCTF (replacing Botpack.CTFGame)
+1. Copy NewCTFv13.u and NewCTFInterface.u into System folder
+2. Set Gamemode to NewCTFv13.NewCTF (replacing Botpack.CTFGame)
 
 ## Client Settings
 

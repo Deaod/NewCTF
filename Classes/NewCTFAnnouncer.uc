@@ -101,19 +101,13 @@ function InitSections() {
     local PlayerPawn P;
     local int i;
     local Info Inf;
-    P = GetLocalPlayer();
 
+    P = GetLocalPlayer();
     if (P == none) return;
 
-    foreach AllActors(class'Info', Inf) {
-        if (InF.IsA('PureInfo')) {
-            i = int(Inf.GetPropertyText("zzPlayerCalcViewCalls"));
-            if (Inf.SetPropertyText("zzPlayerCalcViewCalls", string(i))) {
-                PureInfo = Inf;
-                break;
-            }
-        }
-    }
+    foreach AllActors(class'Info', Inf)
+        if (InF.IsA('PureInfo'))
+            PureInfo = Inf;
 
     General = P.Spawn(class'AnnouncementPlayer', P);
 
@@ -285,16 +279,20 @@ event Tick(float DeltaTime) {
     local rotator CameraRotation;
     local int i;
     local int PCVCalls;
+    local ENetRole PureInfoRole;
 
     P = GetLocalPlayer();
     if (P == none) return;
 
     if (PureInfo != none) {
+        PureInfoRole = PureInfo.Role;
+        PureInfo.Role = ROLE_Authority;
         PCVCalls = int(PureInfo.GetPropertyText("zzPlayerCalcViewCalls"));
         if (PCVCalls <= 0)
             PureInfo.SetPropertyText("zzPlayerCalcViewCalls", "1");
         P.PlayerCalcView(ViewActor, CameraLocation, CameraRotation);
         PureInfo.SetPropertyText("zzPlayerCalcViewCalls", string(PCVCalls));
+        PureInfo.Role = PureInfoRole;
     } else {
         P.PlayerCalcView(ViewActor, CameraLocation, CameraRotation);
     }

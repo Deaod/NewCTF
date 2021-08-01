@@ -11,8 +11,8 @@ Enhanced CTF Gamemode for UnrealTournament. It adds the following features compa
 
 ## Installation
 
-1. Copy NewCTFv13.u and NewCTFInterface.u into System folder
-2. Set Gamemode to NewCTFv13.NewCTF (replacing Botpack.CTFGame)
+1. Copy NewCTFv14.u and NewCTFInterface.u into System folder
+2. Set Gamemode to NewCTFv14.NewCTF (replacing Botpack.CTFGame)
 
 ## Client Settings
 
@@ -20,7 +20,7 @@ The settings for clients/players can be found in NewCTF.ini in your System folde
 ```ini
 [ClientSettings]
 AnnouncerVolume=1.5
-CTFAnnouncerClass=NewCTFv13.DefaultAnnouncer
+CTFAnnouncerClass=NewCTFv14.DefaultAnnouncer
 Debug=False
 _Version=1
 ```
@@ -29,7 +29,7 @@ _Version=1
 Controls the volume of announcements. Valid settings range from `0.0` to `6.0`.
 
 ### CTFAnnouncerClass
-Which announcements to use. NewCTF comes with two announcers: NewCTFv13.DefaultAnnouncer and NewCTFv13.NewCTFAnnouncer.
+Which announcements to use. NewCTF comes with two announcers: NewCTFv14.DefaultAnnouncer and NewCTFv14.NewCTFAnnouncer.
 
 Announcers can have custom sounds for the following CTF events:
 * FlagDropped - When a flag was dropped by a player
@@ -43,10 +43,10 @@ Announcers can have custom sounds for the following CTF events:
 
 Note that all announcements play in addition to the games internal sounds
 
-#### NewCTFv13.DefaultAnnouncer
+#### NewCTFv14.DefaultAnnouncer
 Only provides custom sounds for Overtime, Advantage, and Draw, which would not have sounds otherwise.
 
-#### NewCTFv13.NewCTFAnnouncer
+#### NewCTFv14.NewCTFAnnouncer
 Provides sounds for all events.
 
 #### Interface
@@ -62,7 +62,7 @@ This is an version number for your settings, used to automatically upgrade your 
 The settings for servers can be found in UnrealTournament.ini in your System folder, the contents of which will be similar to this:
 
 ```ini
-[NewCTFv13.NewCTF]
+[NewCTFv14.NewCTF]
 SpawnSystemThreshold=4
 SpawnEnemyBlockRange=650.0
 SpawnEnemyVisionBlockRange=2000.0
@@ -184,5 +184,5 @@ Advantage applies even if overtime is allowed.
 The game might first go into Advantage, then into Overtime if the resolution of Advantage resulted in a drawn game.
 
 ## Building
-1. Open a command line window, go to your UnrealTournament installation folder and clone this repository using `git clone https://github.com/Deaod/NewCTF.git NewCTFv13`
-2. Use build.bat to build a new NewCTFv13.u, which will also be copied to the System folder of this repository
+1. Open a command line window, go to your UnrealTournament installation folder and clone this repository using `git clone https://github.com/Deaod/NewCTF.git NewCTFv14`
+2. Use build.bat to build a new NewCTFv14.u, which will also be copied to the System folder of this repository

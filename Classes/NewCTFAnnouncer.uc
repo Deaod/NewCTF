@@ -31,6 +31,7 @@ var AnnouncementPlayer General;
 var bool AnnouncementPlaying;
 var float AnnouncerVolume;
 var class<INewCTFAnnouncer> AnnouncerClass;
+var Info PureInfo;
 
 function AnnouncementContent GetAnnouncementContent(byte Ann, optional byte Team) {
     local AnnouncementContent Def;
@@ -99,9 +100,20 @@ static function InitAnnouncements(INewCTFAnnouncer Announcer) {
 function InitSections() {
     local PlayerPawn P;
     local int i;
+    local Info Inf;
     P = GetLocalPlayer();
 
     if (P == none) return;
+
+    foreach AllActors(class'Info', Inf) {
+        if (InF.IsA('PureInfo')) {
+            i = int(Inf.GetPropertyText("zzPlayerCalcViewCalls"));
+            if (Inf.SetPropertyText("zzPlayerCalcViewCalls", string(i))) {
+                PureInfo = Inf;
+                break;
+            }
+        }
+    }
 
     General = P.Spawn(class'AnnouncementPlayer', P);
 
@@ -272,11 +284,21 @@ event Tick(float DeltaTime) {
     local vector CameraLocation;
     local rotator CameraRotation;
     local int i;
+    local int PCVCalls;
 
     P = GetLocalPlayer();
     if (P == none) return;
 
-    P.PlayerCalcView(ViewActor, CameraLocation, CameraRotation);
+    if (PureInfo != none) {
+        PCVCalls = int(PureInfo.GetPropertyText("zzPlayerCalcViewCalls"));
+        if (PCVCalls <= 0)
+            PureInfo.SetPropertyText("zzPlayerCalcViewCalls", "1");
+        P.PlayerCalcView(ViewActor, CameraLocation, CameraRotation);
+        PureInfo.SetPropertyText("zzPlayerCalcViewCalls", string(PCVCalls));
+    } else {
+        P.PlayerCalcView(ViewActor, CameraLocation, CameraRotation);
+    }
+
     General.SetLocation(CameraLocation);
     for (i = 0; i < MaxNumTeams; i++)
         Team[i].SetLocation(CameraLocation);

@@ -53,7 +53,8 @@ state Held {
     function BeginState() {
         local Pawn P;
         local CTFFlag OwnFlag;
-        local vector Delta;
+        local vector DeltaOwn;
+        local vector DeltaEnemy;
 
         super.BeginState();
 
@@ -80,10 +81,13 @@ state Held {
 
         if (Level.Game.IsA('CTFGame')) {
             OwnFlag = CTFReplicationInfo(Level.Game.GameReplicationInfo).FlagList[Holder.PlayerReplicationInfo.Team];
-            if (OwnFlag != none && OwnFlag.bHome && OwnFlag.HomeBase != none) {
-                Delta = Holder.Location - OwnFlag.Location;
-                if (VSize(Delta * vect(1,1,0)) <= Holder.CollisionRadius + OwnFlag.HomeBase.CollisionRadius &&
-                    Abs(Delta.Z) <= Holder.CollisionHeight + OwnFlag.HomeBase.CollisionHeight
+            if (OwnFlag != none && OwnFlag.bHome && EnemyFlag != none) {
+                DeltaOwn = Holder.Location - OwnFlag.Location;
+                DeltaEnemy = Holder.Location - Location;
+                if (VSize(DeltaOwn * vect(1,1,0)) <= Holder.CollisionRadius + OwnFlag.CollisionRadius &&
+                    Abs(DeltaOwn.Z) <= Holder.CollisionHeight + OwnFlag.CollisionHeight &&
+                    VSize(DeltaEnemy * vect(1,1,0)) <= Holder.CollisionRadius + CollisionRadius &&
+                    Abs(DeltaEnemy.Z) <= Holder.CollisionHeight + CollisionHeight
                 ) {
                     OwnFlag.Touch(Holder);
                 }

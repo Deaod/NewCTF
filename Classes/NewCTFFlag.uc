@@ -81,7 +81,7 @@ state Held {
 
         if (Level.Game.IsA('CTFGame')) {
             OwnFlag = CTFReplicationInfo(Level.Game.GameReplicationInfo).FlagList[Holder.PlayerReplicationInfo.Team];
-            if (OwnFlag != none && OwnFlag.bHome && EnemyFlag != none) {
+            if (OwnFlag != none && OwnFlag.bHome) {
                 DeltaOwn = Holder.Location - OwnFlag.Location;
                 DeltaEnemy = Holder.Location - Location;
                 if (VSize(DeltaOwn * vect(1,1,0)) <= Holder.CollisionRadius + OwnFlag.CollisionRadius &&

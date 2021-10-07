@@ -17,6 +17,8 @@ var(SpawnSystem) config int SpawnMinCycleDistance;
 
 // True results in default behavior, False activates an advantage system.
 var(Game) config bool  bAllowOvertime;
+// How long players have to wait in seconds before being able to respawn.
+var(Game) config float RespawnDelay;
 // This is the RespawnDelay after OvertimeRespawnDelayStartTime seconds of
 // overtime.
 var(Game) config float OvertimeRespawnDelay;
@@ -390,23 +392,28 @@ function EndGame(string reason) {
     super.EndGame(reason); // Super is GameInfo
 }
 
-function ScoreKill(Pawn Killer, Pawn Other) {
+function float CalculateRespawnDelay() {
     local int Overtime;
-    local float RespawnDelay;
-
-    super.ScoreKill(Killer, Other);
+    local float Delay;
 
     if (bOverTime) {
         Overtime = GameReplicationInfo.ElapsedTime - OvertimeOffset;
         if (Overtime < OvertimeRespawnDelayStartTime)
-            return;
+            return RespawnDelay;
 
-        RespawnDelay = OvertimeRespawnDelay;
+        Delay = OvertimeRespawnDelay;
         if (OvertimeRespawnDelayCoefficient > 0.0)
-            RespawnDelay += (Overtime - OvertimeRespawnDelayStartTime) / OvertimeRespawnDelayCoefficient;
-
-        Other.SetPropertyText("RespawnDelay", string(FMax(1.0, RespawnDelay))); // dont go below default RespawnDelay
+            Delay += (Overtime - OvertimeRespawnDelayStartTime) / OvertimeRespawnDelayCoefficient;
+        return Delay;
     }
+
+    return RespawnDelay;
+}
+
+function ScoreKill(Pawn Killer, Pawn Other) {
+    super.ScoreKill(Killer, Other);
+
+    Other.SetPropertyText("RespawnDelay", string(FMax(1.0, CalculateRespawnDelay()))); // dont go below default RespawnDelay
 }
 
 function Timer() {
@@ -596,6 +603,7 @@ defaultproperties
     SpawnMinCycleDistance=1
 
     bAllowOvertime=False
+    RespawnDelay=1.0
     OvertimeRespawnDelay=1.0
     OvertimeRespawnDelayCoefficient=120.0
     OvertimeRespawnDelayStartTime=300

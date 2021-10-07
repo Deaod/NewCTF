@@ -71,6 +71,7 @@ SpawnFriendlyVisionBlockRange=150.0
 SpawnFlagBlockRange=750.0
 SpawnMinCycleDistance=1
 bAllowOvertime=False
+RespawnDelay=1.0
 OvertimeRespawnDelay=1.0
 OvertimeRespawnDelayCoefficient=120.0
 OvertimeRespawnDelayStartTime=300
@@ -89,6 +90,9 @@ These settings will be explained in the [Spawn System](#spawn-system) section.
 Whether to allow a match to go into overtime, or to end the game in a draw.  
 Can also be set through the URL using `?bAllowOvertime=(true/false)`.  
 See also [Interaction with Overtime](#interaction-with-overtime).
+
+### RespawnDelay
+This is the default delay after death for player before they can respawn. Applies throughout the game until [OvertimeRespawnDelayStartTime](#overtimerespawndelaystarttime) has been reached.
 
 ### OvertimeRespawnDelay
 After [OvertimeRespawnDelayStartTime](#overtimerespawndelaystarttime) seconds of overtime respawning is delayed by this many seconds (at least 1 second).

@@ -23,7 +23,7 @@ del %PACKAGE_NAME%.u
 ucc make -ini=%BUILD_DIR%make.ini
 
 :: dont do the post-process steps if compilation failed
-if ERRORLEVEL 1 goto cleanup
+if ERRORLEVEL 1 goto compile_failed
 
 :: Generate compressed file for redirects
 ucc compress %PACKAGE_NAME%.u
@@ -40,6 +40,12 @@ popd
 
 if exist "PostBuildHook.bat" call "PostBuildHook.bat"
 
-:cleanup
 popd
 endlocal
+exit /B 0
+
+:compile_failed
+popd
+popd
+endlocal
+exit /B 1

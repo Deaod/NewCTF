@@ -14,6 +14,8 @@ var(SpawnSystem) config float SpawnFriendlyVisionBlockRange;
 var(SpawnSystem) config float SpawnFlagBlockRange;
 // Minimum number of spawn points to cycle through before reusing one
 var(SpawnSystem) config int SpawnMinCycleDistance;
+// If enabled, use extrapolated position of remote players
+var(SpawnSystem) config bool bSpawnExtrapolateMovement;
 
 // True results in default behavior, False activates an advantage system.
 var(Game) config bool  bAllowOvertime;
@@ -458,6 +460,7 @@ function bool IsPlayerStartViable(PlayerStart PS, out byte ExclusionReason)
     local CTFFlag F;
     local bool visible;
     local bool enemy, friend, carrier;
+    local vector playerLoc;
     local float distance;
     local vector eyeHeight;
     local float EBR, EVBR, FBR, FVBR, FlagBR;
@@ -485,8 +488,13 @@ function bool IsPlayerStartViable(PlayerStart PS, out byte ExclusionReason)
         carrier = IsCarryingFlag(P);
 
         eyeHeight.Z = P.BaseEyeHeight;
-        visible = PS.FastTrace(P.Location + eyeHeight);
-        distance = VSize(PS.Location - P.Location + eyeHeight);
+
+        playerLoc = P.Location + eyeHeight;
+        if (bSpawnExtrapolateMovement && P.RemoteRole == ROLE_AutonomousProxy)
+            playerLoc += P.Velocity * 0.0005 * P.PlayerReplicationInfo.Ping;
+
+        visible = PS.FastTrace(playerLoc);
+        distance = VSize(PS.Location - playerLoc);
 
         if ( enemy &&  visible && distance <= EVBR)   { ExclusionReason = 1; return false; }
         if ( enemy && !visible && distance <= EBR)    { ExclusionReason = 2; return false; }
@@ -601,6 +609,7 @@ defaultproperties
     SpawnFriendlyVisionBlockRange=150.0
     SpawnFlagBlockRange=750.0
     SpawnMinCycleDistance=1
+    bSpawnExtrapolateMovement=True
 
     bAllowOvertime=False
     RespawnDelay=1.0

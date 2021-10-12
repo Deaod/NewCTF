@@ -70,6 +70,7 @@ SpawnFriendlyBlockRange=150.0
 SpawnFriendlyVisionBlockRange=150.0
 SpawnFlagBlockRange=750.0
 SpawnMinCycleDistance=1
+bSpawnExtrapolateMovement=True
 bAllowOvertime=False
 RespawnDelay=1.0
 OvertimeRespawnDelay=1.0
@@ -166,6 +167,9 @@ Specifies the range within which a Flag will block a spawn from being used, rega
 
 #### SpawnMinCycleDistance
 Specifies the number of other spawn points that have to have been used before a given spawn point can be used again. Setting it to 0 disables this restriction.
+
+#### bSpawnExtrapolateMovement
+If enabled, use extrapolated position of remote player for range checks of spawn points.
 
 ### Interface
 NewCTFInterface contains an add-on for map makers that allows them to provide alternate spawn system settings for a single map.

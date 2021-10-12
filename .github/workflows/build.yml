@@ -38,17 +38,17 @@ jobs:
       - name: Checkout NewCTF
         uses: actions/checkout@v2
         with:
-          path: NewCTFv14/
+          path: NewCTFv15/
 
       - name: Extract Necessary Resources
         uses: DuckSoft/extract-7z-action@v1.0
         with:
-          pathSource: NewCTFv14/Build/BuildEnv.zip
+          pathSource: NewCTFv15/Build/BuildEnv.zip
           pathTarget: .
 
       # Runs a single command using the runners shell
       - name: Build NewCTF
-        run: NewCTFv14/build.bat
+        run: NewCTFv15/build.bat
 
       - name: Save UCC.log
         if: failure()
@@ -61,8 +61,8 @@ jobs:
         if: success()
         uses: actions/upload-artifact@v2
         with:
-          name: NewCTFv14
+          name: NewCTFv15
           path: |
-            NewCTFv14/System/
-            NewCTFv14/LICENSE
-            NewCTFv14/README.md
+            NewCTFv15/System/
+            NewCTFv15/LICENSE
+            NewCTFv15/README.md

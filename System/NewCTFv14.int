@@ -1,6 +1,6 @@
 [Public]
-Object=(Name=NewCTFv14.NewCTF,Class=Class,MetaClass=Engine.GameInfo)
-Preferences=(Caption="NewCTF",Parent="Game Types",Class=NewCTFv14.NewCTF,Immediate=True)
+Object=(Name=NewCTFv15.NewCTF,Class=Class,MetaClass=Engine.GameInfo)
+Preferences=(Caption="NewCTF",Parent="Game Types",Class=NewCTFv15.NewCTF,Immediate=True)
 
 [NewCTF]
 GameName="New Capture the Flag"

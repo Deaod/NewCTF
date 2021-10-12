@@ -9,7 +9,7 @@ var()          config int    _Version;
 defaultproperties
 {
     AnnouncerVolume=1.5
-    CTFAnnouncerClass="NewCTFv14.DefaultAnnouncer"
+    CTFAnnouncerClass="NewCTFv15.DefaultAnnouncer"
     Debug=False
     _Version=0
 }

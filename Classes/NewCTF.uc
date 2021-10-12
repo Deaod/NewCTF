@@ -620,9 +620,8 @@ function NavigationPoint SecondarySpawnSystem(Pawn Player, int Team) {
     }
     PlayerStartList[Offset + Index] = SP;
 
-    if (Player.IsA('PlayerPawn')) {
-        PlayerPawn(Player).ClientMessage("Used secondary algorithm to spawn");
-    }
+    if (Player.PlayerReplicationInfo != none)
+        BroadcastMessage(Player.PlayerReplicationInfo.PlayerName@"used secondary algorithm to spawn");
 
     return Spawn;
 }

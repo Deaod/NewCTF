@@ -71,6 +71,8 @@ SpawnFriendlyVisionBlockRange=150.0
 SpawnFlagBlockRange=750.0
 SpawnMinCycleDistance=1
 bSpawnExtrapolateMovement=True
+SpawnSecondaryOwnTeamWeight=0.2
+SpawnSecondaryCarrierWeight=2.0
 bAllowOvertime=False
 RespawnDelay=1.0
 OvertimeRespawnDelay=1.0
@@ -132,18 +134,31 @@ Controls how long a flag stays on the ground before being returned automatically
 
 NewCTF comes with a new spawn system, replacing the default one. For the purposes of this document, spawn point and PlayerStart refer to the same thing.
 
+If the number of players on the server is less than or equal to `SpawnSystemThreshold`, the default spawn algorithm of UT99 is used.
+
 NewCTF has a list of spawn points for each team, which is created at the start of each map and shuffled once.
 
-Every time a player tries to respawn during the game, the spawn system goes through the list of that player's team and tries to find a spawn point that can be **used**. If it finds a spawn point that can be used, that spawn point is moved to the end of the list. If no suitable spawn point can be found, the system lets the default spawn system find a spawn point.
+NewCTF has two spawn systems called primary system and secondary system. The primary system tries to find a high-quality spawn point. If the primary system does not find a suitable spawn point, the secondary system is used, which will result in spawns that violate one or more of the rules of the primary system.
 
-A spawn point can be **used** if:
-1. The number of players on the server is greater than `SpawnSystemThreshold`,
-2. No enemy is within `SpawnEnemyBlockRange` of the spawn point,
-3. No enemy is within `SpawnEnemyVisionBlockRange` and has vision of the spawn point (tracing EyeHeight of player to Location of spawn point),
-4. No teammate is within `SpawnFriendlyBlockRange` of the spawn point,
-5. No teammate is within `SpawnFriendlyVisionBlockRange` and has vision of the spawn point,
-6. No flag is within `SpawnFlagBlockRange` of the spawn point and
-7. At least `SpawnMinCycleDistance` other spawn points have been used since the last time this one was used
+Every time a player tries to respawn during the game, the primary spawn system goes through the list of that player's team and tries to find a spawn point that can be *used* given the following restrictions:
+
+1. No enemy is within `SpawnEnemyBlockRange` of the spawn point,
+2. No enemy is within `SpawnEnemyVisionBlockRange` and has vision of the spawn point (tracing EyeHeight of player to Location of spawn point),
+3. No teammate is within `SpawnFriendlyBlockRange` of the spawn point,
+4. No teammate is within `SpawnFriendlyVisionBlockRange` and has vision of the spawn point,
+5. No flag is within `SpawnFlagBlockRange` of the spawn point and
+6. At least `SpawnMinCycleDistance` other spawn points have been used since the last time this one was used
+
+If no suitable spawn point can be found, the system falls back to the secondary system.
+
+The secondary system finds the spawn point thats furthest away from all players. It does this by adding up the distance of every player for each spawn point. The spawn point with the highest sum is then used to spawn. For certain classes of players, the distance can be modified using the following settings:
+
+1. `SpawnSecondaryOwnTeamWeight` (members of the same team)
+2. `SpawnSecondaryCarrierWeight` (flag carriers, both friendly and enemy)
+
+Keep in mind that if you want to prioritize spawning next to a certain class of players, you want to decrease the weight compared to the default for enemies, which is `1.0`.
+
+The spawn point selected by one of the two systems is moved to the end of the list.
 
 ### Settings
 
@@ -170,6 +185,12 @@ Specifies the number of other spawn points that have to have been used before a 
 
 #### bSpawnExtrapolateMovement
 If enabled, use extrapolated position of remote player for range checks of spawn points.
+
+#### SpawnSecondaryOwnTeamWeight
+Multiplier of the distance of members of the same team to spawn points.
+
+#### SpawnSecondaryCarrierWeight
+Multiplier of the distance of flag carriers to spawn points.
 
 ### Interface
 NewCTFInterface contains an add-on for map makers that allows them to provide alternate spawn system settings for a single map.

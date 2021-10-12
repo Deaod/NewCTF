@@ -13,9 +13,13 @@ var(SpawnSystem) config float SpawnFriendlyVisionBlockRange;
 // Range within which any flag will block a spawn
 var(SpawnSystem) config float SpawnFlagBlockRange;
 // Minimum number of spawn points to cycle through before reusing one
-var(SpawnSystem) config int SpawnMinCycleDistance;
+var(SpawnSystem) config int   SpawnMinCycleDistance;
 // If enabled, use extrapolated position of remote players
-var(SpawnSystem) config bool bSpawnExtrapolateMovement;
+var(SpawnSystem) config bool  bSpawnExtrapolateMovement;
+// Weight of own teams distance to spawn points for secondary system
+var(SpawnSystem) config float SpawnSecondaryOwnTeamWeight;
+// Weight of flag carrier distance to spawn points for secondary system
+var(SpawnSystem) config float SpawnSecondaryCarrierWeight;
 
 // True results in default behavior, False activates an advantage system.
 var(Game) config bool  bAllowOvertime;
@@ -53,12 +57,19 @@ var bool bAdvantageDone;
 
 var int OvertimeOffset;
 
+struct SpawnPoint {
+    var PlayerStart Spawn;
+    var int PrimaryUsage;
+    var int SecondaryUsage;
+};
+
 // size of array should be the result of MaxNumTeams*MaxNumSpawnPointsPerTeam
-var PlayerStart PlayerStartList[64];
-var int         TeamSpawnCount[4];
+var NewCTF.SpawnPoint PlayerStartList[64];
+var int               TeamSpawnCount[4];
 
 var int HandledSpawns;
-var int OldSystemSpawns;
+var int PrimarySpawns;
+var int SecondarySpawns;
 
 event InitGame(string Options, out string Error) {
     local string opt;
@@ -90,6 +101,7 @@ function InitSpawnSystem()
     local NavigationPoint N;
     local int PSTeam;
     local PlayerStart PS;
+    local NewCTF.SpawnPoint SP;
     local SpawnControlInfo SCI;
 
     for (i = 0; i < MaxNumTeams; i++)
@@ -101,7 +113,7 @@ function InitSpawnSystem()
         if (PS != none) {
             PSTeam = PS.TeamNumber;
             if (PSTeam < MaxNumTeams && TeamSpawnCount[PSTeam] < MaxNumSpawnPointsPerTeam) {
-                PlayerStartList[PSTeam*MaxNumSpawnPointsPerTeam + TeamSpawnCount[PSTeam]] = PS;
+                PlayerStartList[PSTeam*MaxNumSpawnPointsPerTeam + TeamSpawnCount[PSTeam]].Spawn = PS;
                 TeamSpawnCount[PSTeam] += 1;
             }
         }
@@ -112,9 +124,9 @@ function InitSpawnSystem()
         offset = i * MaxNumSpawnPointsPerTeam;
         for(j = 0; j < TeamSpawnCount[i]; j++) {
             swapTarget = Rand(TeamSpawnCount[i]);
-            PS = PlayerStartList[offset + swapTarget];
+            SP = PlayerStartList[offset + swapTarget];
             PlayerStartList[offset + swapTarget] = PlayerStartList[offset + j];
-            PlayerStartList[offset + j] = PS;
+            PlayerStartList[offset + j] = SP;
         }
     }
 
@@ -344,8 +356,7 @@ function bool SetEndCams(string Reason) {
     }
     CalcEndStats();
 
-    Log(HandledSpawns@"respawns handled of which"@OldSystemSpawns@"("$int(100.0 * float(OldSystemSpawns) / float(HandledSpawns) + 0.5)$"%) fell back to default algorithm.", 'NewCTF');
-
+    LogStats();
     return true;
 }
 
@@ -511,15 +522,115 @@ function bool IsPlayerStartViable(PlayerStart PS, out byte ExclusionReason)
     return true;
 }
 
-function NavigationPoint FindPlayerStart(Pawn Player, optional byte InTeam, optional string incomingName)
-{
+function NavigationPoint PrimarySpawnSystem(Pawn Player, int Team) {
     local int i;
     local int end;
-    local int team;
     local int psOffset;
-    local PlayerStart PS;
-    local Teleporter Tel;
+    local NewCTF.SpawnPoint SP;
     local byte ExclusionReason[16];
+
+    psOffset = Team * MaxNumSpawnPointsPerTeam;
+    for (i = 0; i < TeamSpawnCount[Team] - SpawnMinCycleDistance; i++) {
+        SP = PlayerStartList[psOffset + i];
+
+        if (IsPlayerStartViable(SP.Spawn, ExclusionReason[i])) {
+            end = TeamSpawnCount[Team] - 1;
+            while (i < end) {
+                PlayerStartList[psOffset + i] = PlayerStartList[psOffset + i + 1];
+                i++;
+            }
+
+            PrimarySpawns++;
+            SP.PrimaryUsage++;
+            PlayerStartList[psOffset + i] = SP;
+
+            LastStartSpot = SP.Spawn;
+            return SP.Spawn;
+        }
+    }
+
+    while (i < TeamSpawnCount[Team]) {
+        ExclusionReason[i] = 7;
+        i++;
+    }
+
+    if (Player.PlayerReplicationInfo != none) {
+        LogLine("["$Level.TimeSeconds$"]"@Player.PlayerReplicationInfo.PlayerName@"cannot spawn using primary algorithm");
+        for (i = 0; i < TeamSpawnCount[Team]; ++i)
+            LogLine(PlayerStartList[psOffset + i].Spawn$":"@ExclusionReasonToString(ExclusionReason[i]));
+    }
+
+    return none;
+}
+
+function NavigationPoint SecondarySpawnSystem(Pawn Player, int Team) {
+    local Pawn P;
+    local int Offset;
+    local int Index;
+    local NewCTF.SpawnPoint SP;
+    local bool Friend;
+    local bool Carrier;
+    local vector PlayerLoc;
+    local vector EyeHeight;
+    local float Distance;
+    local float DistanceSum[MaxNumSpawnPointsPerTeam];
+    local int BestIndex;
+    local float BestSum;
+    local NavigationPoint Spawn;
+
+    SecondarySpawns++;
+
+    Offset = Team * MaxNumSpawnPointsPerTeam;
+    for (P = Level.PawnList; P != none; P = P.NextPawn) {
+        if (IsParticipant(P) == false) continue;
+        Friend = IsFriendOfTeam(P, Team);
+        Carrier = IsCarryingFlag(P);
+        EyeHeight.Z = P.BaseEyeHeight;
+
+        PlayerLoc = P.Location + EyeHeight;
+        if (bSpawnExtrapolateMovement && P.RemoteRole == ROLE_AutonomousProxy)
+            playerLoc += P.Velocity * 0.0005 * P.PlayerReplicationInfo.Ping;
+
+        for (Index = 0; Index < TeamSpawnCount[Team]; Index++) {
+            SP = PlayerStartList[Offset + Index];
+
+            Distance = VSize(SP.Spawn.Location - PlayerLoc);
+            if (Friend)
+                Distance *= SpawnSecondaryOwnTeamWeight;
+            if (Carrier)
+                Distance *= SpawnSecondaryCarrierWeight;
+
+            DistanceSum[Index] += Distance;
+        }
+    }
+
+    for (Index = 0; Index < TeamSpawnCount[Team]; Index++) {
+        if (DistanceSum[Index] > BestSum) {
+            BestSum = DistanceSum[Index];
+            BestIndex = Index;
+        }
+    }
+
+    SP = PlayerStartList[Offset + BestIndex];
+    SP.SecondaryUsage++;
+    Spawn = SP.Spawn;
+
+    for(Index = BestIndex; Index < TeamSpawnCount[Team]-1; Index++) {
+        PlayerStartList[Offset + Index] = PlayerStartList[Offset + Index + 1];
+    }
+    PlayerStartList[Offset + Index] = SP;
+
+    if (Player.IsA('PlayerPawn')) {
+        PlayerPawn(Player).ClientMessage("Used secondary algorithm to spawn");
+    }
+
+    return Spawn;
+}
+
+function NavigationPoint FindPlayerStart(Pawn Player, optional byte InTeam, optional string IncomingName) {
+    local int team;
+    local Teleporter Tel;
+    local NavigationPoint Spawn;
 
     // The following is copied from TeamGamePlus
     if ( bStartMatch && (Player != None) && Player.IsA('TournamentPlayer')
@@ -532,50 +643,22 @@ function NavigationPoint FindPlayerStart(Pawn Player, optional byte InTeam, opti
     else
         team = InTeam;
 
-    if( incomingName != "" )
+    if( IncomingName != "" )
         foreach AllActors( class 'Teleporter', Tel )
-            if( string(Tel.Tag) ~= incomingName )
+            if( string(Tel.Tag) ~= IncomingName )
                 return Tel;
     // end of copy
 
     if (team >= MaxNumTeams || NumPlayers <= SpawnSystemThreshold)
-       return super.FindPlayerStart(Player, InTeam, incomingName);
+       return super.FindPlayerStart(Player, InTeam, IncomingName);
 
     ++HandledSpawns;
-    psOffset = team * MaxNumSpawnPointsPerTeam;
-    for (i = 0; i < TeamSpawnCount[team] - SpawnMinCycleDistance; i++) {
-        PS = PlayerStartList[psOffset + i];
 
-        if (IsPlayerStartViable(PS, ExclusionReason[i])) {
-            end = TeamSpawnCount[team] - 1;
-            while (i < end) {
-                PlayerStartList[psOffset + i] = PlayerStartList[psOffset + i + 1];
-                i++;
-            }
+    Spawn = PrimarySpawnSystem(Player, team);
+    if (Spawn != none)
+        return Spawn;
 
-            PlayerStartList[psOffset + i] = PS;
-
-            LastStartSpot = PS;
-            return PS;
-        }
-    }
-
-    while (i < TeamSpawnCount[team]) {
-        ExclusionReason[i] = 7;
-        i++;
-    }
-
-    ++OldSystemSpawns;
-    if (Player.PlayerReplicationInfo != none) {
-        Log("["$Level.TimeSeconds$"]"@Player.PlayerReplicationInfo.PlayerName@"spawned using default algorithm");
-        for (i = 0; i < TeamSpawnCount[team]; ++i) {
-            Log(PlayerStartList[psOffset + i]$":"@ExclusionReasonToString(ExclusionReason[i]));
-        }
-        if (Player.IsA('PlayerPawn')) {
-            PlayerPawn(Player).ClientMessage("Used default algorithm to spawn");
-        }
-    }
-    return super.FindPlayerStart(Player, InTeam, incomingName);
+    return SecondarySpawnSystem(Player, team);
 }
 
 function string ExclusionReasonToString(byte Reason) {
@@ -600,6 +683,34 @@ function float GetFlagTimeout() {
     return FlagTimeout;
 }
 
+function LogLine(coerce string S) {
+    Log(S, 'NewCTF');
+}
+
+function LogStats() {
+    local int Team;
+    LogLine("Total respawns:"@HandledSpawns);
+    LogLine("    Primary:"@PrimarySpawns);
+    LogLine("    Seconary:"@SecondarySpawns);
+    for(Team = 0; Team < MaxTeams; Team++)
+        LogTeamStats(Team);
+}
+
+function LogTeamStats(int Team) {
+    local int Index;
+    local int Offset;
+    LogLine("Spawns for team"@"'"$GetTeam(Team).TeamName$"'");
+    Offset = Team * MaxNumSpawnPointsPerTeam;
+    for (Index = 0; Index < TeamSpawnCount[Team]; Index++)
+        LogSpawnPointStats(PlayerStartList[Offset + Index]);
+}
+
+function LogSpawnPointStats(NewCTF.SpawnPoint SP) {
+    LogLine("    "$SP.Spawn);
+    LogLine("        Primary:"@SP.PrimaryUsage);
+    LogLine("        Secondary:"@SP.SecondaryUsage);
+}
+
 defaultproperties
 {
     SpawnSystemThreshold=4
@@ -610,6 +721,8 @@ defaultproperties
     SpawnFlagBlockRange=750.0
     SpawnMinCycleDistance=1
     bSpawnExtrapolateMovement=True
+    SpawnSecondaryOwnTeamWeight=0.2
+    SpawnSecondaryCarrierWeight=2.0
 
     bAllowOvertime=False
     RespawnDelay=1.0

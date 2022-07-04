@@ -71,6 +71,8 @@ var int HandledSpawns;
 var int PrimarySpawns;
 var int SecondarySpawns;
 
+var string LogIndentation;
+
 event InitGame(string Options, out string Error) {
     local string opt;
 
@@ -683,14 +685,17 @@ function float GetFlagTimeout() {
 }
 
 function LogLine(coerce string S) {
-    Log(S, 'NewCTF');
+    Log(LogIndentation$S, 'NewCTF');
 }
 
 function LogStats() {
     local int Team;
     LogLine("Total respawns:"@HandledSpawns);
-    LogLine("    Primary:"@PrimarySpawns);
-    LogLine("    Seconary:"@SecondarySpawns);
+    LogIndent();
+    LogLine("Primary:"@PrimarySpawns);
+    LogLine("Seconary:"@SecondarySpawns);
+    LogUnindent();
+
     for(Team = 0; Team < MaxTeams; Team++)
         LogTeamStats(Team);
 }
@@ -700,14 +705,27 @@ function LogTeamStats(int Team) {
     local int Offset;
     LogLine("Spawns for team"@"'"$GetTeam(Team).TeamName$"'");
     Offset = Team * MaxNumSpawnPointsPerTeam;
-    for (Index = 0; Index < TeamSpawnCount[Team]; Index++)
+    for (Index = 0; Index < TeamSpawnCount[Team]; Index++) {
+        LogIndent();
         LogSpawnPointStats(PlayerStartList[Offset + Index]);
+        LogUnindent();
+    }
 }
 
 function LogSpawnPointStats(NewCTF.SpawnPoint SP) {
-    LogLine("    "$SP.Spawn);
-    LogLine("        Primary:"@SP.PrimaryUsage);
-    LogLine("        Secondary:"@SP.SecondaryUsage);
+    LogLine(SP.Spawn);
+    LogIndent();
+    LogLine("Primary:"@SP.PrimaryUsage);
+    LogLine("Secondary:"@SP.SecondaryUsage);
+    LogUnindent();
+}
+
+function LogIndent() {
+    LogIndentation = LogIndentation $ "    ";
+}
+
+function LogUnindent() {
+    LogIndentation = Left(LogIndentation, Len(LogIndentation) - 4);
 }
 
 defaultproperties

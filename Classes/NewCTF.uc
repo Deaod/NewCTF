@@ -556,7 +556,7 @@ function NavigationPoint PrimarySpawnSystem(Pawn Player, int Team) {
         i++;
     }
 
-    if (Player.PlayerReplicationInfo != none) {
+    if (Player != none && Player.PlayerReplicationInfo != none) {
         LogLine("["$Level.TimeSeconds$"]"@Player.PlayerReplicationInfo.PlayerName@"cannot spawn using primary algorithm");
         for (i = 0; i < TeamSpawnCount[Team]; ++i)
             LogLine(PlayerStartList[psOffset + i].Spawn$":"@ExclusionReasonToString(ExclusionReason[i]));
@@ -622,7 +622,7 @@ function NavigationPoint SecondarySpawnSystem(Pawn Player, int Team) {
     }
     PlayerStartList[Offset + Index] = SP;
 
-    if (Player.PlayerReplicationInfo != none)
+    if (Player != none && Player.PlayerReplicationInfo != none)
         BroadcastMessage(Player.PlayerReplicationInfo.PlayerName@"used secondary algorithm to spawn");
 
     return Spawn;
@@ -650,7 +650,7 @@ function NavigationPoint FindPlayerStart(Pawn Player, optional byte InTeam, opti
                 return Tel;
     // end of copy
 
-    if (team >= MaxNumTeams || NumPlayers <= SpawnSystemThreshold)
+    if (team >= MaxNumTeams || NumPlayers <= SpawnSystemThreshold || Player == none)
        return super.FindPlayerStart(Player, InTeam, IncomingName);
 
     ++HandledSpawns;

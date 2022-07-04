@@ -591,7 +591,7 @@ function NavigationPoint SecondarySpawnSystem(Pawn Player, int Team) {
 
         PlayerLoc = P.Location + EyeHeight;
         if (bSpawnExtrapolateMovement && P.RemoteRole == ROLE_AutonomousProxy)
-            playerLoc += P.Velocity * 0.0005 * P.PlayerReplicationInfo.Ping;
+            PlayerLoc += P.Velocity * 0.0005 * P.PlayerReplicationInfo.Ping;
 
         for (Index = 0; Index < TeamSpawnCount[Team]; Index++) {
             SP = PlayerStartList[Offset + Index];

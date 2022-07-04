@@ -65,7 +65,7 @@ struct SpawnPoint {
 
 // size of array should be the result of MaxNumTeams*MaxNumSpawnPointsPerTeam
 var NewCTF.SpawnPoint PlayerStartList[64];
-var int               TeamSpawnCount[4];
+var int               TeamSpawnCount[MaxNumTeams];
 
 var int HandledSpawns;
 var int PrimarySpawns;
@@ -529,7 +529,7 @@ function NavigationPoint PrimarySpawnSystem(Pawn Player, int Team) {
     local int end;
     local int psOffset;
     local NewCTF.SpawnPoint SP;
-    local byte ExclusionReason[16];
+    local byte ExclusionReason[MaxNumSpawnPointsPerTeam];
 
     psOffset = Team * MaxNumSpawnPointsPerTeam;
     for (i = 0; i < TeamSpawnCount[Team] - SpawnMinCycleDistance; i++) {

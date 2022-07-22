@@ -547,11 +547,12 @@ function bool IsPlayerStartViable(PlayerStart PS, out byte ExclusionReason)
     local NewCTFFlag F;
     local bool visible;
     local bool enemy, friend, carrier;
-    local vector playerLoc;
+    local vector playerLoc, spawnEyeLoc;
     local float distance;
     local vector eyeHeight;
     local float EBR, EVBR, FBR, FVBR, FlagBR;
     local SpawnControlPlayerStart SCPS;
+    local float VisionRange;
 
     EBR = SpawnEnemyBlockRange;
     EVBR = SpawnEnemyVisionBlockRange;
@@ -568,26 +569,37 @@ function bool IsPlayerStartViable(PlayerStart PS, out byte ExclusionReason)
         if (SCPS.SpawnFlagBlockRange >= 0)           FlagBR = SCPS.SpawnFlagBlockRange;
     }
 
+    VisionRange = FMax(EVBR, FVBR);
+
     for (P = Level.PawnList; P != none; P = P.NextPawn) {
         if (IsParticipant(P) == false) continue;
         enemy = IsEnemyOfTeam(P, PS.TeamNumber);
         friend = IsFriendOfTeam(P, PS.TeamNumber);
         carrier = IsCarryingFlag(P);
+        visible = false;
 
         eyeHeight.Z = P.BaseEyeHeight;
+        spawnEyeLoc = PS.Location;
+        spawnEyeLoc.Z += P.default.BaseEyeHeight;
 
         playerLoc = P.Location + eyeHeight;
         if (bSpawnExtrapolateMovement && P.RemoteRole == ROLE_AutonomousProxy)
             playerLoc += P.Velocity * 0.0005 * P.PlayerReplicationInfo.Ping;
 
-        visible = PS.FastTrace(playerLoc);
-        distance = VSize(PS.Location - playerLoc);
+        distance = FMin(VSize(PS.Location - P.Location), VSize(spawnEyeLoc - playerLoc));
+        if (distance <= VisionRange) {
+            visible = PS.FastTrace(playerLoc) || PS.FastTrace(playerLoc, spawnEyeLoc);
+            if (bSpawnExtrapolateMovement && P.RemoteRole == ROLE_AutonomousProxy)
+                visible = visible
+                    || PS.FastTrace(P.Location + eyeHeight)
+                    || PS.FastTrace(P.Location + eyeHeight, spawnEyeLoc);
+        }
 
-        if ( enemy &&  visible && distance <= EVBR)   { ExclusionReason = 1; return false; }
-        if ( enemy && !visible && distance <= EBR)    { ExclusionReason = 2; return false; }
-        if (friend &&  visible && distance <= FVBR)   { ExclusionReason = 3; return false; }
-        if (friend && !visible && distance <= FBR)    { ExclusionReason = 4; return false; }
-        if ( enemy &&  carrier && distance <= FlagBR) { ExclusionReason = 5; return false; }
+        if ( enemy && visible && distance <= EVBR)   { ExclusionReason = 1; return false; }
+        if ( enemy &&            distance <= EBR)    { ExclusionReason = 2; return false; }
+        if (friend && visible && distance <= FVBR)   { ExclusionReason = 3; return false; }
+        if (friend &&            distance <= FBR)    { ExclusionReason = 4; return false; }
+        if ( enemy && carrier && distance <= FlagBR) { ExclusionReason = 5; return false; }
     }
 
     foreach PS.RadiusActors(class'NewCTFFlag', F, FlagBR) {

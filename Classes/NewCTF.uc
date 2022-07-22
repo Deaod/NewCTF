@@ -544,7 +544,7 @@ function bool IsCarryingFlag(Pawn P)
 function bool IsPlayerStartViable(PlayerStart PS, out byte ExclusionReason)
 {
     local Pawn P;
-    local CTFFlag F;
+    local NewCTFFlag F;
     local bool visible;
     local bool enemy, friend, carrier;
     local vector playerLoc;
@@ -590,7 +590,7 @@ function bool IsPlayerStartViable(PlayerStart PS, out byte ExclusionReason)
         if ( enemy &&  carrier && distance <= FlagBR) { ExclusionReason = 5; return false; }
     }
 
-    foreach PS.RadiusActors(class'CTFFlag', F, FlagBR) {
+    foreach PS.RadiusActors(class'NewCTFFlag', F, FlagBR) {
         ExclusionReason = 6;
         return false;
     }

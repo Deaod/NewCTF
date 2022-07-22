@@ -66,12 +66,19 @@ struct SpawnPoint {
 // size of array should be the result of MaxNumTeams*MaxNumSpawnPointsPerTeam
 var NewCTF.SpawnPoint PlayerStartList[64];
 var int               TeamSpawnCount[MaxNumTeams];
+var Texture           TeamSkinMap[MaxNumTeams];
+var NewCTFSpawnDummy  DummyList[64];
+
 
 var int HandledSpawns;
 var int PrimarySpawns;
 var int SecondarySpawns;
 
 var string LogIndentation;
+
+var Mutator WarmupMutator;
+var bool bWarmupMutatorSearchDone;
+var bool bWarmupDone;
 
 event InitGame(string Options, out string Error) {
     local string opt;
@@ -115,8 +122,10 @@ function InitSpawnSystem()
         if (PS != none) {
             PSTeam = PS.TeamNumber;
             if (PSTeam < MaxNumTeams && TeamSpawnCount[PSTeam] < MaxNumSpawnPointsPerTeam) {
-                PlayerStartList[PSTeam*MaxNumSpawnPointsPerTeam + TeamSpawnCount[PSTeam]].Spawn = PS;
+                i = PSTeam*MaxNumSpawnPointsPerTeam + TeamSpawnCount[PSTeam];
+                PlayerStartList[i].Spawn = PS;
                 TeamSpawnCount[PSTeam] += 1;
+                DummyList[i] = CreateSpawnDummy(PS);
             }
         }
     }
@@ -194,6 +203,23 @@ function InitFlags() {
     }
 }
 
+function NewCTFSpawnDummy CreateSpawnDummy(PlayerStart PS) {
+    local NewCTFSpawnDummy D;
+
+    D = Spawn(class'NewCTFSpawnDummy', none, '', PS.Location, PS.Rotation);
+    if (D == none)
+        return none;
+
+    D.CTFGame = self;
+    D.RelatedPlayerStart = PS;
+
+    return D;
+}
+
+function PlayerStart GetPlayerStartByIndex(int i) {
+    return PlayerStartList[i].Spawn;
+}
+
 function PostBeginPlay() {
     super.PostBeginPlay();
     InitSpawnSystem();
@@ -208,6 +234,33 @@ function PostBeginPlay() {
 
 simulated event PostNetBeginPlay() {
     class'NewCTFMessages'.static.InitAnnouncements(self);
+}
+
+function Mutator FindWarmupMutator() {
+    if (bWarmupMutatorSearchDone)
+        return WarmupMutator;
+
+    if (WarmupMutator == none)
+        foreach AllActors(class'Mutator', WarmupMutator)
+            if (WarmupMutator.IsA('MutWarmup'))
+                break;
+
+    if (WarmupMutator != none && WarmupMutator.IsA('MutWarmup') == false)
+        WarmupMutator = none;
+
+    bWarmupMutatorSearchDone = true;
+    return WarmupMutator;
+}
+
+function bool IsInWarmup() {
+    local Mutator M;
+    local bool bInWarmup;
+
+    M = FindWarmupMutator();
+    if (M != none)
+        bInWarmup = (M.GetPropertyText("bInWarmup") ~= "true");
+
+    return bInWarmup || CountDown > 0;
 }
 
 function ScoreFlag(Pawn Scorer, CTFFlag F) {
@@ -431,6 +484,17 @@ function ScoreKill(Pawn Killer, Pawn Other) {
     Other.SetPropertyText("RespawnDelay", string(FMax(1.0, CalculateRespawnDelay()))); // dont go below default RespawnDelay
 }
 
+function RemoveSpawnDummies() {
+    local int i;
+
+    for (i = 0; i < arraycount(DummyList); ++i) {
+        if (DummyList[i] != none) {
+            DummyList[i].Destroy();
+            DummyList[i] = none;
+        }
+    }
+}
+
 function Timer() {
     if (bAdvantage && IsEveryFlagHome()) {
         bAdvantageDone = true;
@@ -442,13 +506,23 @@ function Timer() {
     if (bAdvantage && bAdvantageDone) {
         bAdvantage = false;
     }
+
+    if (bWarmupDone == false) {
+        bWarmupDone = (IsInWarmup() == false);
+        if (bWarmupDone) {
+            RemoveSpawnDummies();
+        }
+    }
 }
 
 function bool IsParticipant(Pawn P) {
     return (P.PlayerReplicationInfo != none)
         && (P.Health > 0)
         && (P.IsA('Spectator') == false)
-        && (P.bCollideActors);
+        && (   P.bCollideActors
+            || P.IsInState('PlayerWalking')
+            || P.IsInState('PlayerSwimming')
+            || P.IsInState('PlayerFlying'));
 }
 
 function bool IsEnemyOfTeam(Pawn P, byte team)

@@ -205,6 +205,15 @@ Can be placed anywhere on the map, is invisible and contains alternate settings 
 #### SpawnControlPlayerStart
 This is a replacement for the default PlayerStart. It behaves like it in every way, but provides a way to override Range settings of the spawn system for a single spawn point.
 
+### Visualization
+NewCTF places a player dummy on each spawn point until the match starts. Its texture indicates whether the spawn point would be used by the primary algorithm.
+
+* Green: Spawn point ready to spawn a player
+* Red: Spawn point blocked by enemy player
+* Blue: Spawn point blocked by friendly player
+* Gold: Spawn point blocked by flag
+* Grey: Spawn point used too recently
+
 ## Advantage
 NewCTF introduces an advantage system which delays the end of a match if at least one flag is not on its FlagBase at the end of the regular time. Advantage will end once all flags are on their FlagBases, either by being returned or by being captured, or alternatively it will end when the additional time granted by the [AdvantageDuration](#advantageduration) setting runs out.
 

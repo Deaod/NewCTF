@@ -23,11 +23,12 @@ function Texture GetDummyTexture() {
     local bool Viable;
     local int T;
     local int i;
-    local int end;
+    local int start, end;
 
     T = RelatedPlayerStart.TeamNumber;
-    end = T*CTFGame.MaxNumSpawnPointsPerTeam + CTFGame.TeamSpawnCount[T];
-    for (i = end - CTFGame.SpawnMinCycleDistance; i < end; ++i)
+    start = T*CTFGame.MaxNumSpawnPointsPerTeam;
+    end = start + CTFGame.TeamSpawnCount[T];
+    for (i = Max(end - CTFGame.SpawnMinCycleDistance, start); i < end; ++i)
         if (CTFGame.GetPlayerStartByIndex(i) == RelatedPlayerStart)
             return Texture'GreySkin';
 

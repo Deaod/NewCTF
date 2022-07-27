@@ -7,7 +7,9 @@ var PlayerStart RelatedPlayerStart;
 
 event PostBeginPlay() {
     LoopAnim('Breath1');
-    SetTimer(0.2, true);
+
+    if (CTFGame.MaxPlayers > CTFGame.SpawnSystemThreshold)
+        SetTimer(0.2, true);
 }
 
 event Timer() {

@@ -7,9 +7,7 @@ var PlayerStart RelatedPlayerStart;
 
 event PostBeginPlay() {
     LoopAnim('Breath1');
-
-    if (CTFGame.MaxPlayers > CTFGame.SpawnSystemThreshold)
-        SetTimer(0.2, true);
+    SetTimer(0.2, true);
 }
 
 event Timer() {
@@ -24,6 +22,9 @@ function Texture GetDummyTexture() {
     local int T;
     local int i;
     local int start, end;
+
+    if (CTFGame.MaxPlayers <= CTFGame.SpawnSystemThreshold)
+        return Texture'GreySkin';
 
     T = RelatedPlayerStart.TeamNumber;
     start = T*CTFGame.MaxNumSpawnPointsPerTeam;

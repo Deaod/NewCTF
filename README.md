@@ -71,6 +71,7 @@ SpawnFriendlyVisionBlockRange=150.0
 SpawnFlagBlockRange=750.0
 SpawnMinCycleDistance=1
 bSpawnExtrapolateMovement=True
+bSpawnSecondaryEnabled=True
 SpawnSecondaryOwnTeamWeight=0.2
 SpawnSecondaryCarrierWeight=2.0
 bAllowOvertime=False
@@ -185,6 +186,9 @@ Specifies the number of other spawn points that have to have been used before a 
 
 #### bSpawnExtrapolateMovement
 If enabled, use extrapolated position of remote player for range checks of spawn points.
+
+#### bSpawnSecondaryEnabled
+If enabled, use secondary algorithm to find a suitable spawn point if primary algorithm cant find one. If disabled, skip using secondary algorithm and fall back to default algorithm.
 
 #### SpawnSecondaryOwnTeamWeight
 Multiplier of the distance of members of the same team to spawn points.

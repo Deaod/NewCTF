@@ -16,6 +16,8 @@ var(SpawnSystem) config float SpawnFlagBlockRange;
 var(SpawnSystem) config int   SpawnMinCycleDistance;
 // If enabled, use extrapolated position of remote players
 var(SpawnSystem) config bool  bSpawnExtrapolateMovement;
+// If enabled, use secondary algorithm, else fall back to default
+var(SpawnSystem) config bool  bSpawnSecondaryEnabled;
 // Weight of own teams distance to spawn points for secondary system
 var(SpawnSystem) config float SpawnSecondaryOwnTeamWeight;
 // Weight of flag carrier distance to spawn points for secondary system
@@ -73,6 +75,7 @@ var NewCTFSpawnDummy  DummyList[64];
 var int HandledSpawns;
 var int PrimarySpawns;
 var int SecondarySpawns;
+var int DefaultSpawns;
 
 var string LogIndentation;
 
@@ -667,6 +670,9 @@ function NavigationPoint SecondarySpawnSystem(Pawn Player, int Team) {
     local float BestSum;
     local NavigationPoint Spawn;
 
+    if (bSpawnSecondaryEnabled == false)
+        return none;
+
     SecondarySpawns++;
 
     Offset = Team * MaxNumSpawnPointsPerTeam;
@@ -751,6 +757,11 @@ function NavigationPoint FindPlayerStart(Pawn Player, optional byte InTeam, opti
     if (Spawn != none)
         return Spawn;
 
+    ++DefaultSpawns;
+
+    if (Player != none && Player.PlayerReplicationInfo != none)
+        BroadcastMessage(Player.PlayerReplicationInfo.PlayerName@"used default algorithm to spawn");
+
     return super.FindPlayerStart(Player, InTeam, IncomingName);
 }
 
@@ -786,6 +797,7 @@ function LogStats() {
     LogIndent();
     LogLine("Primary:"@PrimarySpawns);
     LogLine("Seconary:"@SecondarySpawns);
+    LogLine("Default:"@DefaultSpawns);
     LogUnindent();
 
     for(Team = 0; Team < MaxTeams; Team++)
@@ -830,6 +842,7 @@ defaultproperties
     SpawnFlagBlockRange=750.0
     SpawnMinCycleDistance=1
     bSpawnExtrapolateMovement=True
+    bSpawnSecondaryEnabled=True
     SpawnSecondaryOwnTeamWeight=0.2
     SpawnSecondaryCarrierWeight=2.0
 

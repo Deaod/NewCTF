@@ -747,7 +747,11 @@ function NavigationPoint FindPlayerStart(Pawn Player, optional byte InTeam, opti
     if (Spawn != none)
         return Spawn;
 
-    return SecondarySpawnSystem(Player, team);
+    Spawn = SecondarySpawnSystem(Player, team);
+    if (Spawn != none)
+        return Spawn;
+
+    return super.FindPlayerStart(Player, InTeam, IncomingName);
 }
 
 function string ExclusionReasonToString(byte Reason) {

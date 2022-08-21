@@ -655,6 +655,7 @@ function NavigationPoint SecondarySpawnSystem(Pawn Player, int Team) {
     local Pawn P;
     local int Offset;
     local int Index;
+    local int End;
     local NewCTF.SpawnPoint SP;
     local bool Friend;
     local bool Carrier;
@@ -669,6 +670,7 @@ function NavigationPoint SecondarySpawnSystem(Pawn Player, int Team) {
     SecondarySpawns++;
 
     Offset = Team * MaxNumSpawnPointsPerTeam;
+    End = TeamSpawnCount[Team] - SpawnMinCycleDistance;
     for (P = Level.PawnList; P != none; P = P.NextPawn) {
         if (IsParticipant(P) == false) continue;
         Friend = IsFriendOfTeam(P, Team);
@@ -679,7 +681,7 @@ function NavigationPoint SecondarySpawnSystem(Pawn Player, int Team) {
         if (bSpawnExtrapolateMovement && P.RemoteRole == ROLE_AutonomousProxy)
             PlayerLoc += P.Velocity * 0.0005 * P.PlayerReplicationInfo.Ping;
 
-        for (Index = 0; Index < TeamSpawnCount[Team]; Index++) {
+        for (Index = 0; Index < End; Index++) {
             SP = PlayerStartList[Offset + Index];
 
             Distance = VSize(SP.Spawn.Location - PlayerLoc);
@@ -692,7 +694,7 @@ function NavigationPoint SecondarySpawnSystem(Pawn Player, int Team) {
         }
     }
 
-    for (Index = 0; Index < TeamSpawnCount[Team]; Index++) {
+    for (Index = 0; Index < End; Index++) {
         if (DistanceSum[Index] > BestSum) {
             BestSum = DistanceSum[Index];
             BestIndex = Index;

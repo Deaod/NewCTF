@@ -118,7 +118,7 @@ set VERBOSE=0
 if %VERBOSE% GEQ 3 echo on
 
 call :SetPackageName "%BUILD_DIR%."
-call :Hook "%~dp0BuildSettings.bat"
+call "%~dp0BuildSettings.bat"
 
 set BUILD_TEMP=%BUILD_DIR%Build\Temp\
 

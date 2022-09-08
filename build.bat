@@ -284,7 +284,7 @@ exit /B %ERRORLEVEL%
     if [%1] EQU [] exit /B %ERRORLEVEL%
     if exist "%BUILD_DIR%Build/Dependencies/%1/" (
     	if %VERBOSE% GEQ 1 echo Copying Dependency %1
-        copy "%BUILD_DIR%Build/Dependencies/%1/*" .. >NUL
+        robocopy "%BUILD_DIR%Build/Dependencies/%1/" .. *.* /S
     ) else (
         echo "Could not locate dependency '%1' in '%BUILD_DIR%Build/Dependencies/'"
     )

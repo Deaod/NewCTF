@@ -606,6 +606,7 @@ function bool IsPlayerStartViable(PlayerStart PS, out byte ExclusionReason)
     }
 
     foreach PS.RadiusActors(class'NewCTFFlag', F, FlagBR) {
+        if (F.bHeld) continue;
         ExclusionReason = 6;
         return false;
     }

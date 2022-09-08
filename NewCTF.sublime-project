@@ -2,7 +2,8 @@
 	"folders":
 	[
 		{
-			"path": "."
+			"path": ".",
+			"folder_exclude_patterns": ["Build/Temp"]
 		}
 	],
     "settings":
@@ -17,7 +18,7 @@
         {
             "name": "Build NewCTF",
             "file_patterns": ["*.uc"],
-            "cmd": ["$project_path/build.bat"]
+            "cmd": ["$project_path/build.bat", "silent"]
         }
     ]
 }

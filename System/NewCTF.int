@@ -1,5 +1,5 @@
 [Public]
-Object=(Name=NewCTFv16.NewCTF,Class=Class,MetaClass=Engine.GameInfo)
+Object=(Name=NewCTF.NewCTF,Class=Class,MetaClass=Engine.GameInfo)
 Preferences=(Caption="NewCTF",Parent="Game Types",Class=NewCTFv16.NewCTF,Immediate=True)
 
 [NewCTF]

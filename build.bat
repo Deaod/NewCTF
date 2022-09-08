@@ -282,7 +282,8 @@ exit /B %ERRORLEVEL%
 
 :PrepareDependencies
     if [%1] EQU [] exit /B %ERRORLEVEL%
-    if exist "%BUILD_DIR%Build/Dependencies/%1/" ( 
+    if exist "%BUILD_DIR%Build/Dependencies/%1/" (
+    	if %VERBOSE% GEQ 1 echo Copying Dependency %1
         copy "%BUILD_DIR%Build/Dependencies/%1/*" .. >NUL
     ) else (
         echo "Could not locate dependency '%1' in '%BUILD_DIR%Build/Dependencies/'"

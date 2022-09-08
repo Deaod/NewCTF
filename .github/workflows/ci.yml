@@ -88,7 +88,7 @@ jobs:
           pathTarget: .
 
       - name: Build ${{ github.event.repository.name }}
-        run: "${{ env.PKG_NAME }}/Build.bat silent noint nouz"
+        run: "${{ env.PKG_NAME }}/Build.bat silent noint nouz verbose"
 
       - name: Save UCC.log
         if: failure()

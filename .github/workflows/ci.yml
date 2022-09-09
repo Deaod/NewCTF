@@ -74,10 +74,10 @@ jobs:
           Get-ChildItem "${{ env.PKG_NAME }}/System/${{ github.event.repository.name }}.*" | ForEach-Object {
             Replace-PackageName($_)
           }
-          Get-ChildItem "${{ env.PKG_NAME }}/System/ACEFileList-${{ github.event.repository.name }}.*" | ForEach-Object {
+          Get-ChildItem "${{ env.PKG_NAME }}/System/ACEFileList_${{ github.event.repository.name }}.*" | ForEach-Object {
             Replace-PackageName($_)
           }
-          Get-ChildItem "${{ env.PKG_NAME }}/System/ACETweakList-${{ github.event.repository.name }}.*" | ForEach-Object {
+          Get-ChildItem "${{ env.PKG_NAME }}/System/ACETweakList_${{ github.event.repository.name }}.*" | ForEach-Object {
             Replace-PackageName($_)
           }
 

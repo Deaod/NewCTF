@@ -101,14 +101,14 @@ jobs:
         run: |
           if (Test-Path -Path "${{ env.PKG_NAME }}/System" -PathType Container)    { Copy-Item -Path "${{ env.PKG_NAME }}/System" -Destination "Release/System" -Recurse -Force -Verbose }
           if (Test-Path -Path "${{ env.PKG_NAME }}/Docs" -PathType Container)      { Copy-Item -Path "${{ env.PKG_NAME }}/Docs" -Destination "Release/Docs" -Recurse -Force -Verbose }
-          if (Test-Path -Path "${{ env.PKG_NAME }}/LICENSE" -PathType Container)   { Copy-Item -Path "${{ env.PKG_NAME }}/LICENSE" -Destination "Release" -Verbose }
-          if (Test-Path -Path "${{ env.PKG_NAME }}/README.md" -PathType Container) { Copy-Item -Path "${{ env.PKG_NAME }}/README.md" -Destination "Release" -Verbose }
+          if (Test-Path -Path "${{ env.PKG_NAME }}/LICENSE")                       { Copy-Item -Path "${{ env.PKG_NAME }}/LICENSE" -Destination "Release" -Verbose }
+          if (Test-Path -Path "${{ env.PKG_NAME }}/README.md")                     { Copy-Item -Path "${{ env.PKG_NAME }}/README.md" -Destination "Release" -Verbose }
           if (Test-Path -Path "${{ env.PKG_NAME }}/Build/Dependencies" -PathType Container) {
             Get-ChildItem "${{ env.PKG_NAME }}/Build/Dependencies" | ForEach-Object {
               $Dep = $_
               if (Test-Path $Dep -PathType Container) {
                 Get-ChildItem $Dep | ForEach-Object {
-                  Copy-Item $_ -Destination ("Release/"+$_.Name) -Recurse -Force -Verbose
+                  Copy-Item $_ -Destination "Release" -Recurse -Force -Verbose
                 }
               }
             }

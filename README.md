@@ -162,7 +162,7 @@ If no suitable spawn point can be found, the system falls back to the secondary 
 The secondary system finds the spawn point thats furthest away from all players. It does this by adding up the distance of every player for each spawn point. The spawn point with the highest sum is then used to spawn. For certain classes of players, the distance can be modified using the following settings:
 
 1. `SpawnSecondaryOwnTeamWeight` (members of the same team)
-2. `SpawnSecondaryCarrierWeight` (flag carriers, both friendly and enemy)
+2. `SpawnSecondaryCarrierWeight` (enemy flag carriers)
 
 Keep in mind that if you want to prioritize spawning next to a certain class of players, you want to decrease the weight compared to the default for enemies, which is `1.0`.
 
@@ -236,5 +236,5 @@ Advantage applies even if overtime is allowed.
 The game might first go into Advantage, then into Overtime if the resolution of Advantage resulted in a drawn game.
 
 ## Building
-1. Open a command line window, go to your UnrealTournament installation folder and clone this repository using `git clone https://github.com/Deaod/NewCTF.git NewCTFv16`
-2. Use build.bat to build a new NewCTFv16.u, which will also be copied to the System folder of this repository
+1. Open a command line window, go to your UnrealTournament installation folder and clone this repository using `git clone https://github.com/Deaod/NewCTF.git`
+2. Use build.bat to build a new NewCTF.u, which will also be copied to the System folder of this repository

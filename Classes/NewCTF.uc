@@ -589,7 +589,7 @@ function bool IsPlayerStartViable(PlayerStart PS, out byte ExclusionReason)
 
         playerLoc = P.Location + eyeHeight;
         if (bSpawnExtrapolateMovement && P.RemoteRole == ROLE_AutonomousProxy)
-            playerLoc += P.Velocity * 0.0005 * P.PlayerReplicationInfo.Ping;
+            playerLoc += P.Velocity * 0.0005 * Min(P.PlayerReplicationInfo.Ping, 250);
 
         distance = FMin(VSize(PS.Location - P.Location), VSize(spawnEyeLoc - playerLoc));
         if (distance <= VisionRange) {
@@ -688,7 +688,7 @@ function NavigationPoint SecondarySpawnSystem(Pawn Player, int Team) {
 
         PlayerLoc = P.Location + EyeHeight;
         if (bSpawnExtrapolateMovement && P.RemoteRole == ROLE_AutonomousProxy)
-            PlayerLoc += P.Velocity * 0.0005 * P.PlayerReplicationInfo.Ping;
+            PlayerLoc += P.Velocity * 0.0005 * Min(P.PlayerReplicationInfo.Ping, 250);
 
         for (Index = 0; Index < End; Index++) {
             SP = PlayerStartList[Offset + Index];

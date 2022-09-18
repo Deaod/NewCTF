@@ -81,6 +81,7 @@ OvertimeRespawnDelay=1.0
 OvertimeRespawnDelayCoefficient=120.0
 OvertimeRespawnDelayStartTime=300
 AdvantageDuration=120
+AdvantageMaxScoreDiff=-1
 MercyScore=0
 bFlagGlow=True
 FlagTimeout=25.0
@@ -113,6 +114,11 @@ After this many seconds of overtime, respawning could be delayed by more than no
 How much time (in seconds) to add on top of the regular time to allow flags in play at the end to be resolved. Note that due to implementation details AdvantageDuration can not be set to 60 seconds. NewCTF will write a warning about this to the log and set AdvantageDuration to 59 automatically.  
 Can also be set through the URL using `?AdvantageDuration=X`.  
 See section [Advantage](#advantage).
+
+### AdvantageMaxScoreDiff
+This is intended to allow limiting when advantage can happen by looking at the difference in score between the two teams and not going to advantage when the difference is greater than the value of this setting.
+
+Negative values for this setting disable it, so advantage can always kick in.
 
 ### MercyScore
 If MercyScore is greater than 0, and one team is at least one more than

@@ -41,6 +41,9 @@ var(Game) config int   OvertimeRespawnDelayStartTime;
 // Extra time if a flag is in play when the game ends, 0 for no limit
 // Never use the value 60, if you like the end-of-match countdown.
 var(Game) config int   AdvantageDuration;
+// Maximum score difference that allows advantage to kick in at the end of the
+// match. Negative values mean no limit.
+var(Game) config int   AdvantageMaxScoreDiff;
 // Maximum score difference between best team and second-best team.
 // If exceeded, game ends immediately.
 var(Game) config int   MercyScore;
@@ -299,13 +302,11 @@ function ScoreFlag(Pawn Scorer, CTFFlag F) {
     }
 }
 
-function CheckMercy() {
+function int GetMinScoreDiff() {
     local int i;
     local TeamInfo T[4];
     local TeamInfo Temp;
     local int Best;
-
-    if (MercyScore <= 0) return;
 
     for (i = 0; i < MaxTeams; ++i)
         T[i] = Teams[i];
@@ -332,7 +333,13 @@ function CheckMercy() {
         T[Best] = Temp;
     }
 
-    if (T[0].Score - T[1].Score > MercyScore) {
+    return T[0].Score - T[1].Score;
+}
+
+function CheckMercy() {
+    if (MercyScore <= 0) return;
+
+    if (GetMinScoreDiff() > MercyScore) {
         EndGame("mercy");
     }
 }
@@ -433,7 +440,12 @@ function EndGame(string reason) {
             return;
         }
 
-        if (bAdvantageDone == false && bAdvantage == false && IsEveryFlagHome() == false && AdvantageDuration > 0) {
+        if (AdvantageDuration > 0 &&
+            bAdvantage == false &&
+            bAdvantageDone == false &&
+            IsEveryFlagHome() == false &&
+            (AdvantageMaxScoreDiff < 0 || GetMinScoreDiff() <= AdvantageMaxScoreDiff)
+        ) {
             bAdvantage = true;
             RemainingTime = AdvantageDuration;
             // Youre probably wondering why the value 60 cant be used. Well, its
@@ -856,6 +868,7 @@ defaultproperties
     OvertimeRespawnDelayCoefficient=120.0
     OvertimeRespawnDelayStartTime=300
     AdvantageDuration=120
+    AdvantageMaxScoreDiff=-1
     MercyScore=0
     bFlagGlow=True
     FlagTimeout=25.0

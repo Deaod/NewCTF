@@ -18,6 +18,8 @@ var(SpawnSystem) config int   SpawnMinCycleDistance;
 var(SpawnSystem) config bool  bSpawnExtrapolateMovement;
 // If enabled, use secondary algorithm, else fall back to default
 var(SpawnSystem) config bool  bSpawnSecondaryEnabled;
+// Maximum distance that can influence the secondary spawn system
+var(SpawnSystem) config float SpawnSecondaryMaxDistance;
 // Weight of own teams distance to spawn points for secondary system
 var(SpawnSystem) config float SpawnSecondaryOwnTeamWeight;
 // Weight of flag carrier distance to spawn points for secondary system
@@ -691,10 +693,10 @@ function NavigationPoint SecondarySpawnSystem(Pawn Player, int Team) {
         for (Index = 0; Index < End; Index++) {
             SP = PlayerStartList[Offset + Index];
 
-            Distance = VSize(SP.Spawn.Location - PlayerLoc);
+            Distance = FMin(VSize(SP.Spawn.Location - PlayerLoc), SpawnSecondaryMaxDistance);
             if (Friend)
                 Distance *= SpawnSecondaryOwnTeamWeight;
-            if (Carrier)
+            else if (Carrier)
                 Distance *= SpawnSecondaryCarrierWeight;
 
             DistanceSum[Index] += Distance;
@@ -844,6 +846,7 @@ defaultproperties
     SpawnMinCycleDistance=1
     bSpawnExtrapolateMovement=True
     bSpawnSecondaryEnabled=True
+    SpawnSecondaryMaxDistance=2000.0
     SpawnSecondaryOwnTeamWeight=0.2
     SpawnSecondaryCarrierWeight=2.0
 

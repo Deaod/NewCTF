@@ -209,6 +209,8 @@ function InitFlags() {
         FB.TakenSound = FBAlarm;
         FB.NetUpdateFrequency = 20.0;
     }
+
+    Spawn(class'NewCTFFlagFix', self);
 }
 
 function NewCTFSpawnDummy CreateSpawnDummy(PlayerStart PS) {

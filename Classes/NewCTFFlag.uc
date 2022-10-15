@@ -34,9 +34,54 @@ function SendHome() {
 }
 
 function Drop(vector newVel) {
-    if (   (Holder.Region.Zone.bPainZone && (Holder.Region.Zone.DamagePerSec > 0)) == false
-        && (Holder.FootRegion.Zone.bPainZone && (Holder.FootRegion.Zone.DamagePerSec > 0)) == false
-    ) {
+    local Pawn OldHolder;
+    local vector X,Y,Z;
+    local vector NewLoc;
+    local bool bHolderPainZone;
+
+    BroadcastLocalizedMessage(class'CTFMessage', 2, Holder.PlayerReplicationInfo, None, CTFGame(Level.Game).Teams[Team]);
+    if (Level.Game.WorldLog != None)
+        Level.Game.WorldLog.LogSpecialEvent("flag_dropped", Holder.PlayerReplicationInfo.PlayerID, CTFGame(Level.Game).Teams[Team].TeamIndex);
+    if (Level.Game.LocalLog != None)
+        Level.Game.LocalLog.LogSpecialEvent("flag_dropped", Holder.PlayerReplicationInfo.PlayerID, CTFGame(Level.Game).Teams[Team].TeamIndex);
+
+    RotationRate.Yaw = int(FRand() - 0.5) * 200000;
+    RotationRate.Pitch = int(FRand() - 0.5) * (200000 - Abs(RotationRate.Yaw));
+    Velocity = (0.2 + FRand()) * (newVel + 400 * FRand() * VRand());
+    If (Region.Zone.bWaterZone)
+        Velocity *= 0.5;
+    OldHolder = Holder;
+    Holder.PlayerReplicationInfo.HasFlag = None;
+    Holder.AmbientGlow = Holder.Default.AmbientGlow;
+    LightType = LT_Steady;
+    Holder.LightType = LT_None;
+    bHolderPainZone =
+        (Holder.Region.Zone.bPainZone && (Holder.Region.Zone.DamagePerSec > 0)) ||
+        (Holder.FootRegion.Zone.bPainZone && (Holder.FootRegion.Zone.DamagePerSec > 0));
+    if (Holder.Inventory != None)
+        Holder.Inventory.SetOwnerDisplay();
+    Holder = None;
+
+    GetAxes(OldHolder.Rotation, X,Y,Z);
+    SetRotation(rotator(-1 * X));
+    bCollideWorld = true;
+    SetCollisionSize(0.5 * Default.CollisionRadius, CollisionHeight);
+    NewLoc = OldHolder.Location - 2 * OldHolder.CollisionRadius * X + OldHolder.CollisionHeight * vect(0,0,0.5);
+    if ((SetLocation(NewLoc) == false || FastTrace(OldHolder.Location, Location) == false) && SetLocation(OldHolder.Location) == false) {
+        SetCollisionSize(0.8 * OldHolder.CollisionRadius, FMin(CollisionHeight, 0.8 * OldHolder.CollisionHeight));
+        if (SetLocation(OldHolder.Location) == false) {
+            SendHome();
+            return;
+        }
+    }
+
+    SetPhysics(PHYS_Falling);
+    SetBase(None);
+    SetCollision(true, false, false);
+    GotoState('Dropped');
+    if (bHolderPainZone)
+        Timer();
+    else
         BroadcastLocalizedMessage(
             class'NewCTFMessages',
             1, // FlagDropped
@@ -44,9 +89,6 @@ function Drop(vector newVel) {
             none,
             CTFGame(Level.Game).Teams[Team]
         );
-    }
-
-    super.Drop(newVel);
 }
 
 state Held {

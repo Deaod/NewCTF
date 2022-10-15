@@ -3,10 +3,20 @@ class NewCTFFlagFix extends Info;
 var CTFReplicationInfo GRI;
 
 simulated event Tick(float Delta) {
-    if (Level.Game.GameReplicationInfo == none)
-        return;
+    local GameReplicationInfo G;
 
-    GRI = CTFReplicationInfo(Level.Game.GameReplicationInfo);
+    if (GRI == none) {
+        if (Level.Game == none) {
+            foreach AllActors(class'GameReplicationInfo', G)
+                break;
+        } else {
+            G = Level.Game.GameReplicationInfo;
+        }
+        GRI = CTFReplicationInfo(G);
+        if (GRI == none)
+            return;
+    }
+
     if (Role == ROLE_Authority)
         GotoState('ServerAction');
     else

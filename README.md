@@ -11,8 +11,8 @@ Enhanced CTF Gamemode for UnrealTournament. It adds the following features compa
 
 ## Installation
 
-1. Copy NewCTFv16.u and NewCTFInterface.u into System folder
-2. Set Gamemode to NewCTFv16.NewCTF (replacing Botpack.CTFGame)
+1. Copy NewCTF_v17.u and NewCTFInterface.u into System folder
+2. Set Gamemode to NewCTF_v17.NewCTF (replacing Botpack.CTFGame)
 
 ## Client Settings
 
@@ -20,7 +20,7 @@ The settings for clients/players can be found in NewCTF.ini in your System folde
 ```ini
 [ClientSettings]
 AnnouncerVolume=1.5
-CTFAnnouncerClass=NewCTFv16.DefaultAnnouncer
+CTFAnnouncerClass=NewCTF_v17.DefaultAnnouncer
 Debug=False
 _Version=1
 ```
@@ -29,7 +29,7 @@ _Version=1
 Controls the volume of announcements. Valid settings range from `0.0` to `6.0`.
 
 ### CTFAnnouncerClass
-Which announcements to use. NewCTF comes with two announcers: NewCTFv16.DefaultAnnouncer and NewCTFv16.NewCTFAnnouncer.
+Which announcements to use. NewCTF comes with two announcers: NewCTF_v17.DefaultAnnouncer and NewCTF_v17.NewCTFAnnouncer.
 
 Announcers can have custom sounds for the following CTF events:
 * FlagDropped - When a flag was dropped by a player
@@ -43,10 +43,10 @@ Announcers can have custom sounds for the following CTF events:
 
 Note that all announcements play in addition to the games internal sounds
 
-#### NewCTFv16.DefaultAnnouncer
+#### NewCTF_v17.DefaultAnnouncer
 Only provides custom sounds for Overtime, Advantage, and Draw, which would not have sounds otherwise.
 
-#### NewCTFv16.NewCTFAnnouncer
+#### NewCTF_v17.NewCTFAnnouncer
 Provides sounds for all events.
 
 #### Interface
@@ -62,7 +62,7 @@ This is an version number for your settings, used to automatically upgrade your 
 The settings for servers can be found in UnrealTournament.ini in your System folder, the contents of which will be similar to this:
 
 ```ini
-[NewCTFv16.NewCTF]
+[NewCTF_v17.NewCTF]
 SpawnSystemThreshold=4
 SpawnEnemyBlockRange=650.0
 SpawnEnemyVisionBlockRange=2000.0

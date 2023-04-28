@@ -270,7 +270,7 @@ function bool IsInWarmup() {
     if (M != none)
         bInWarmup = (M.GetPropertyText("bInWarmup") ~= "true");
 
-    return bInWarmup || CountDown > 0;
+    return (bNetReady == false) || bInWarmup || (bRequireReady && CountDown > 0);
 }
 
 function ScoreFlag(Pawn Scorer, CTFFlag F) {

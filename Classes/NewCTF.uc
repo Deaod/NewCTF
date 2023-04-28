@@ -270,7 +270,13 @@ function bool IsInWarmup() {
     if (M != none)
         bInWarmup = (M.GetPropertyText("bInWarmup") ~= "true");
 
-    return (bNetReady == false) || bInWarmup || (bRequireReady && CountDown > 0);
+    // I do not understand what bNetReady is supposed to tell me.
+    //   My understanding of bNetReady is that its true when the game is waiting
+    // for NetWait seconds to pass. A better name would have been
+    // bWaitForNetReady.
+    //   Anyway, the result is that the logic is reversed from what youd assume
+    // based on the name.
+    return bNetReady || bInWarmup || (bRequireReady && CountDown > 0);
 }
 
 function ScoreFlag(Pawn Scorer, CTFFlag F) {

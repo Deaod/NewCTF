@@ -47,7 +47,13 @@ function Drop(vector newVel) {
 
     RotationRate.Yaw = int(FRand() - 0.5) * 200000;
     RotationRate.Pitch = int(FRand() - 0.5) * (200000 - Abs(RotationRate.Yaw));
-    Velocity = (0.2 + FRand()) * (newVel + 400 * FRand() * VRand());
+    if (bEnableModifiedFlagDrop)
+        // Modified drop, following player velocity direction and capping maximum speed.
+        Velocity = FMin(VSize(newVel), FlagDropMaximumSpeed)*Normal(newVel);
+    else
+        // Base game behaviour
+        Velocity = (0.2 + FRand()) * (newVel + 400 * FRand() * VRand());
+    
     If (Region.Zone.bWaterZone)
         Velocity *= 0.5;
     OldHolder = Holder;

@@ -39,6 +39,19 @@ function Drop(vector newVel) {
     local vector NewLoc;
     local bool bHolderPainZone;
 
+    local NewCTF G;
+    local bool bEnableModifiedFlagDrop;
+    local float FlagDropMaximumSpeed;
+
+    G = NewCTF(Level.Game);
+    if (G != none) {
+        bEnableModifiedFlagDrop = G.bEnableModifiedFlagDrop;
+        FlagDropMaximumSpeed = G.FlagDropMaximumSpeed;
+    } else {
+        bEnableModifiedFlagDrop = False;
+        FlagDropMaximumSpeed = 0;
+    }
+
     BroadcastLocalizedMessage(class'CTFMessage', 2, Holder.PlayerReplicationInfo, None, CTFGame(Level.Game).Teams[Team]);
     if (Level.Game.WorldLog != None)
         Level.Game.WorldLog.LogSpecialEvent("flag_dropped", Holder.PlayerReplicationInfo.PlayerID, CTFGame(Level.Game).Teams[Team].TeamIndex);
@@ -49,7 +62,7 @@ function Drop(vector newVel) {
     RotationRate.Pitch = int(FRand() - 0.5) * (200000 - Abs(RotationRate.Yaw));
     if (bEnableModifiedFlagDrop)
         // Modified drop, following player velocity direction and capping maximum speed.
-        Velocity = FMin(VSize(newVel), FlagDropMaximumSpeed)*Normal(newVel);
+        Velocity = FMin(VSize(newVel),  FlagDropMaximumSpeed)*Normal(newVel);
     else
         // Base game behaviour
         Velocity = (0.2 + FRand()) * (newVel + 400 * FRand() * VRand());

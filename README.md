@@ -206,6 +206,12 @@ Multiplier of the distance of members of the same team to spawn points.
 #### SpawnSecondaryCarrierWeight
 Multiplier of the distance of flag carriers to spawn points.
 
+#### bEnableModifiedFlagDrop
+If enabled, replaces the default flag drop behaviour. When a flag is dropped by a player, it will move in the player's last velocity direction at a maximum speed of FlagDropMaximumSpeed.
+
+#### FlagDropMaximumSpeed
+Limits the maximum speed of a flag to this value when it is dropped. Only applies if bEnableModifiedFlagDrop is enabled.
+
 ### Interface
 NewCTFInterface contains an add-on for map makers that allows them to provide alternate spawn system settings for a single map.
 

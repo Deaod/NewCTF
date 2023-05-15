@@ -55,10 +55,10 @@ var(Game) config float FlagTimeout;
 var(Game) config float FlagTimeoutAdvantage;
 // How long the flag will remain on the ground during overtime
 var(Game) config float FlagTimeoutOvertime;
-// True replaces default game flag drop behaviour, False uses a modified drop takes player velocity up to a maximum speed controlled by FlagDropMaximumSpeed
-var(Game) config boolean bEnableModifiedFlagDrop
+// False results in default behaviour. True replaces flag drop behaviour where a dropped flag takes the player velocity up to a maximum speed of FlagDropMaximumSpeed.
+var(Game) config boolean bEnableModifiedFlagDrop;
 // Limits the velocity of a flag to this value when it is dropped. Only applies if bEnableModifiedFlagDrop is true.
-var(Game) config float FlagDropMaximumSpeed
+var(Game) config float FlagDropMaximumSpeed;
 
 const MaxNumSpawnPointsPerTeam = 16;
 const MaxNumTeams = 4;

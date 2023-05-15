@@ -56,7 +56,7 @@ var(Game) config float FlagTimeoutAdvantage;
 // How long the flag will remain on the ground during overtime
 var(Game) config float FlagTimeoutOvertime;
 // False results in default behaviour. True replaces flag drop behaviour where a dropped flag takes the player velocity up to a maximum speed of FlagDropMaximumSpeed.
-var(Game) config boolean bEnableModifiedFlagDrop;
+var(Game) config bool  bEnableModifiedFlagDrop;
 // Limits the velocity of a flag to this value when it is dropped. Only applies if bEnableModifiedFlagDrop is true.
 var(Game) config float FlagDropMaximumSpeed;
 

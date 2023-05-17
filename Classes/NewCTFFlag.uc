@@ -2,8 +2,6 @@ class NewCTFFlag extends CTFFlag;
 
 function SendHome() {
     local DeathMatchPlus G;
-    local Pawn P;
-    local vector D;
 
     G = DeathMatchPlus(Level.Game);
 
@@ -110,8 +108,6 @@ state Held {
     function BeginState() {
         local Pawn P;
         local CTFFlag OwnFlag;
-        local vector DeltaOwn;
-        local vector DeltaEnemy;
 
         super.BeginState();
 

@@ -1,5 +1,6 @@
 /Build/Temp/**/*
 /System/**/NewCTF*.u*
+/Classes/VersionInfo.uc
 
 PostBuildHook.bat
 

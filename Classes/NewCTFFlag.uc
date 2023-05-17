@@ -21,16 +21,11 @@ function SendHome() {
 
     super.SendHome();
 
-    if (HomeBase != none && Level.Game.GameReplicationInfo.GameEndedComments == "") {
-        for (P = Level.PawnList; P != none; P = P.NextPawn) {
-            D = P.Location - Location;
-            if (P.IsA('Spectator') || P.bCollideActors == false)
-                continue;
-            if (VSize(D * vect(1,1,0)) <= P.CollisionRadius + CollisionRadius && Abs(D.Z) <= P.CollisionHeight + CollisionHeight) {
-                Touch(P);
-            }
-        }
-    }
+    // CTFFlag.SendHome calls SetLocation before SetCollision.
+    // SetCollision seems to not re-evaluate which Actors are now being touched.
+    // Fix this by calling SetLocation again after SetCollision.
+    if (Level.Game.bGameEnded == false)
+        SetLocation(Location);
 }
 
 function Drop(vector newVel) {
@@ -97,6 +92,7 @@ function Drop(vector newVel) {
     SetPhysics(PHYS_Falling);
     SetBase(None);
     SetCollision(true, false, false);
+    SetLocation(Location); // see equivalent line in function SendHome() for why
     GotoState('Dropped');
     if (bHolderPainZone)
         Timer();
@@ -142,17 +138,10 @@ state Held {
 
         if (Level.Game.IsA('CTFGame')) {
             OwnFlag = CTFReplicationInfo(Level.Game.GameReplicationInfo).FlagList[Holder.PlayerReplicationInfo.Team];
-            if (OwnFlag != none && OwnFlag.bHome) {
-                DeltaOwn = Holder.Location - OwnFlag.Location;
-                DeltaEnemy = Holder.Location - Location;
-                if (VSize(DeltaOwn * vect(1,1,0)) <= Holder.CollisionRadius + OwnFlag.CollisionRadius &&
-                    Abs(DeltaOwn.Z) <= Holder.CollisionHeight + OwnFlag.CollisionHeight &&
-                    VSize(DeltaEnemy * vect(1,1,0)) <= Holder.CollisionRadius + CollisionRadius &&
-                    Abs(DeltaEnemy.Z) <= Holder.CollisionHeight + CollisionHeight
-                ) {
-                    OwnFlag.Touch(Holder);
-                }
-            }
+            if (OwnFlag != none && OwnFlag.bHome)
+                foreach OwnFlag.TouchingActors(class'Pawn', P)
+                    if (P == Holder)
+                        OwnFlag.Touch(Holder);
         }
     }
 }

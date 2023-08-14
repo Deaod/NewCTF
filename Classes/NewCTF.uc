@@ -199,7 +199,6 @@ function InitFlags() {
 
         if (F != none) {
             F.HomeBase = FB;
-            F.Team = FB.Team;
 
             oldF = ctfState.FlagList[FB.Team];
             oldF.GoToState('Held'); // next, transition flag out of state Home right now

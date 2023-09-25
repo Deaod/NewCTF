@@ -1,7 +1,7 @@
 class NewCTFFlagBlue extends NewCTFFlag;
 
 defaultproperties {
-    Team=0
+    Team=1
     LightHue=170
     Skin=texture'Botpack.Skins.JpflagB'
 }

@@ -1,7 +1,7 @@
 class NewCTFFlagRed extends NewCTFFlag;
 
 defaultproperties {
-    Team=1
+    Team=0
     LightHue=0
     Skin=texture'Botpack.Skins.JpflagR'
 }

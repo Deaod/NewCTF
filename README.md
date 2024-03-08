@@ -88,6 +88,8 @@ FlagTimeout=25.0
 FlagAdvantageTimeout=25.0
 FlagOvertimeTimeout=25.0
 SpectatorPassword=""
+bAllowChangingTeams=True
+bAllowChangingNames=True
 bEnableAssignedTeams=False
 AssignedTeamStrategy="0000011111"
 ```
@@ -145,6 +147,12 @@ Controls how long a flag stays on the ground before being returned automatically
 If set, players that use it will automatically be assigned the spectator role upon joining the server.
 
 Must not be the same as `GamePassword`.
+
+### bAllowChangingTeams
+Controls whether players are able to change teams after joining.
+
+### bAllowChangingNames
+Controls whether players are able to change their names after joining.
 
 ### bEnableAssignedTeams
 Enables assigning players to teams based on the password they use. The individual passwords are contained in GamePassword and to be separated by `;`. The team those players are assigned to is determined by `AssignedTeamStrategy`.

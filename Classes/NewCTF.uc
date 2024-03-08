@@ -61,6 +61,10 @@ var(Game) config bool  bEnableModifiedFlagDrop;
 var(Game) config float FlagDropMaximumSpeed;
 // Using this password will automatically assign you as spectator
 var(Game) config string SpectatorPassword;
+// Whether players can change teams after joining
+var(Game) config bool   bAllowChangingTeams;
+// Whether players can change their names after joining
+var(Game) config bool   bAllowChangingNames;
 // Whether teams and names should be assigned based on the password provided by players
 var(Game) config bool   bEnableAssignedTeams;
 // Configures which teams are assigned to which passwords contained in GamePassword
@@ -998,6 +1002,18 @@ function float GetFlagTimeout() {
     return FlagTimeout;
 }
 
+function bool ChangeTeam(Pawn Other, int NewTeam) {
+    if (bAllowChangingTeams) {
+        return super.ChangeTeam(Other, NewTeam);
+    }
+    return false;
+}
+
+function ChangeName(Pawn Other, string S, bool bNameChange) {
+    if (bAllowChangingNames)
+        super.ChangeName(Other, S, bNameChange);
+}
+
 function LogLine(coerce string S) {
     Log(LogIndentation$S, 'NewCTF');
 }
@@ -1075,6 +1091,8 @@ defaultproperties
     FlagDropMaximumSpeed=200.0
 
     SpectatorPassword=""
+    bAllowChangingTeams=True
+    bAllowChangingNames=True
 
     bEnableAssignedTeams=False
     AssignedTeamStrategy="0000011111"

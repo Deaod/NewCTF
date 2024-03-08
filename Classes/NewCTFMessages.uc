@@ -103,7 +103,7 @@ static function CreateAnnouncer(actor Ctx, PlayerPawn LP) {
 static function InitAnnouncements(actor Ctx, optional PlayerPawn LP) {
     if (default.bInitialized) return;
 
-    default.SettingsHelper = new(LP, 'NewCTF') class'Object';
+    default.SettingsHelper = new(none, 'NewCTF') class'Object';
     default.Settings = new(default.SettingsHelper, 'ClientSettings') class'NewCTFClientSettings';
     Log("Created ClientSettings Object, saving ...", 'NewCTF');
     default.Settings.SaveConfig();

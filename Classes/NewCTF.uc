@@ -59,6 +59,12 @@ var(Game) config float FlagTimeoutOvertime;
 var(Game) config bool  bEnableModifiedFlagDrop;
 // Limits the velocity of a flag to this value when it is dropped. Only applies if bEnableModifiedFlagDrop is true.
 var(Game) config float FlagDropMaximumSpeed;
+// Using this password will automatically assign you as spectator
+var(Game) config string SpectatorPassword;
+// Whether teams and names should be assigned based on the password provided by players
+var(Game) config bool   bEnableAssignedTeams;
+// Configures which teams are assigned to which passwords contained in GamePassword
+var(Game) config string AssignedTeamStrategy;
 
 const MaxNumSpawnPointsPerTeam = 16;
 const MaxNumTeams = 4;
@@ -92,8 +98,18 @@ var Mutator WarmupMutator;
 var bool bWarmupMutatorSearchDone;
 var bool bWarmupDone;
 
+struct PlayerAssignedTeam {
+    var string Pass;
+    var string PlayerName;
+    var byte Team;
+};
+
+var PlayerAssignedTeam AssignedPlayer[32];
+var int NumAssignedPlayers;
+
 event InitGame(string Options, out string Error) {
     local string opt;
+    local string GamePW;
 
     super.InitGame(Options, Error);
 
@@ -114,6 +130,59 @@ event InitGame(string Options, out string Error) {
     opt = ParseOption(Options, "bFlagGlow");
     if (opt != "" && !(opt ~= "false"))
         bFlagGlow = true;
+
+    GamePW = GetPropertyText("GamePassword");
+    opt = ParseOption(Options, "SpectatorPassword");
+    if (opt != "" && opt != GamePW)
+        SpectatorPassword = opt;
+
+    if (bEnableAssignedTeams && InStr(GamePW, ";") >= 0) {
+        ParseAssignedTeamConfig(GamePW);
+    }
+}
+
+function ParseAssignedTeamConfig(string Cfg) {
+    local string Part;
+    local string Strat;
+    local int Pos;
+    local int Index;
+
+    Index = 0;
+    while(Index < Len(AssignedTeamStrategy) && Cfg != "") {
+        Pos = InStr(Cfg, ";");
+        Part = Left(Cfg, Pos);
+        if (Part != "") {
+            Strat = Mid(AssignedTeamStrategy, Index, 1);
+            Index += 1;
+
+            if (Strat ~= "s") {
+                SpectatorPassword = Part;
+            } else {
+                ParseAssignment(Part, int(Strat));
+            }
+        }
+
+        Cfg = Mid(Cfg, Pos + 1);
+    }
+}
+
+function ParseAssignment(string Part, int Team) {
+    local string Pass, PlayerName;
+    local int Pos;
+
+    Pos = InStr(Part, "%");
+    if (Pos >= 0) {
+        Pass = Left(Part, Pos);
+        PlayerName = Mid(Part, Pos + 1);
+    } else {
+        Pass = Part;
+    }
+
+    AssignedPlayer[NumAssignedPlayers].Pass = Pass;
+    AssignedPlayer[NumAssignedPlayers].PlayerName = PlayerName;
+    AssignedPlayer[NumAssignedPlayers].Team = byte(Team);
+
+    NumAssignedPlayers += 1;
 }
 
 function InitSpawnSystem()
@@ -247,6 +316,122 @@ function PostBeginPlay() {
 
 simulated event PostNetBeginPlay() {
     class'NewCTFMessages'.static.InitAnnouncements(self);
+}
+
+event PreLogin(
+    string Options,
+    string Address,
+    out string Error,
+    out string FailCode
+) {
+    local string InPassword;
+    local string GamePW, AdminPW;
+
+    GamePW = GetPropertyText("GamePassword");
+    AdminPW = GetPropertyText("AdminPassword");
+
+    InPassword = ParseOption(Options, "Password");
+    Error="";
+
+    if (!CheckIPPolicy(Address)) {
+        Error = IPBanned;
+        return;
+    }
+
+    if (AdminPW != "" && InPassword ~= AdminPW) {
+        return;
+    }
+
+    if ((Level.NetMode != NM_Standalone) && AtCapacity(Options)) {
+        Error = MaxedOutMessage;
+        return;
+    }
+
+    if (GamePW == "") {
+        return;
+    }
+
+    if (InPassword == "") {
+        Error = NeedPassword;
+        FailCode = "NEEDPW";
+        return;
+    }
+
+    if (bEnableAssignedTeams && IsAssignedPassword(InPassword)) {
+        return;
+    }
+
+    if (InPassword ~= GamePW) {
+        return;
+    }
+
+    if (InPassword ~= SpectatorPassword) {
+        return;
+    }
+
+    Error = WrongPassword;
+    FailCode = "WRONGPW";
+    return;
+}
+
+function bool IsAssignedPassword(string Password) {
+    local int i;
+
+    for (i = 0; i < NumAssignedPlayers; i += 1)
+        if (Password ~= AssignedPlayer[i].Pass)
+            return true;
+
+    return false;
+}
+
+event PlayerPawn Login(
+    string Portal,
+    string Options,
+    out string Error,
+    class<PlayerPawn> SpawnClass
+) {
+    local string Password;
+    local int i;
+
+    Password = ParseOption(Options, "Password");
+    if (bEnableAssignedTeams) {
+        for (i = 0; i < NumAssignedPlayers; i += 1) {
+            if (Password ~= AssignedPlayer[i].Pass) {
+                Options = RemoveOption(Options, "Team");
+                Options = Options$"?Team="$AssignedPlayer[i].Team;
+                if (AssignedPlayer[i].PlayerName != "") {
+                    Options = RemoveOption(Options, "Name");
+                    Options = Options$"?Name="$AssignedPlayer[i].PlayerName;
+                }
+                break;
+            }
+        }
+    }
+
+    if (SpectatorPassword != "" && Password ~= SpectatorPassword) {
+        Options = RemoveOption(Options, "OverrideClass");
+        Options = Options$"?OverrideClass=Botpack.CHSpectator";
+    }
+
+    return super.Login(Portal, Options, Error, SpawnClass);
+}
+
+function string RemoveOption(string Options, string ToRemove) {
+    local int Pos;
+    local string Result;
+
+    Pos = InStr(Options, "?"$ToRemove$"=");
+
+    if (Pos < 0)
+        return Options; // nothing to remove;
+
+    Result = Left(Options, Pos);
+    Options = Mid(Options, Pos + Len(ToRemove) + 2);
+    Pos = InStr(Options, "?");
+    if (Pos < 0)
+        return Result;
+
+    return RemoveOption(Result $ Mid(Options, Pos), ToRemove); // recurse to find all occurrences
 }
 
 function Mutator FindWarmupMutator() {
@@ -888,6 +1073,11 @@ defaultproperties
 
     bEnableModifiedFlagDrop=False
     FlagDropMaximumSpeed=200.0
+
+    SpectatorPassword=""
+
+    bEnableAssignedTeams=False
+    AssignedTeamStrategy="0000011111"
 
     GameName="New Capture the Flag"
 }

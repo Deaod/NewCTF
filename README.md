@@ -87,6 +87,9 @@ bFlagGlow=True
 FlagTimeout=25.0
 FlagAdvantageTimeout=25.0
 FlagOvertimeTimeout=25.0
+SpectatorPassword=""
+bEnableAssignedTeams=False
+AssignedTeamStrategy="0000011111"
 ```
 
 ### Spawn*
@@ -137,6 +140,26 @@ Controls how long a flag stays on the ground before being returned automatically
 
 ### FlagTimeoutOvertime
 Controls how long a flag stays on the ground before being returned automatically during overtime.
+
+### SpectatorPassword
+If set, players that use it will automatically be assigned the spectator role upon joining the server.
+
+Must not be the same as `GamePassword`.
+
+### bEnableAssignedTeams
+Enables assigning players to teams based on the password they use. The individual passwords are contained in GamePassword and to be separated by `;`. The team those players are assigned to is determined by `AssignedTeamStrategy`.
+
+Optionally the password can contain a player name, that the player using the password will be forced to upon joining. The name does not need to be entered as part of the password and is separated from the password by `%`.
+
+### AssignedTeamStrategy
+Controls which team players are assigned to depending on the position inside `GamePassword` of the password they used. The first character in this string determines the team for the first non-empty password in `GamePassword`, etc.. If the character is `s` or `S` then the associated password is assigned to [`SpectatorPassword`](#spectatorpassword), else its expected to be a team number between 0 and 3.
+
+|Number| Team |
+|:----:|------|
+|0     |Red   |
+|1     |Blue  |
+|2     |Green |
+|3     |Gold  |
 
 ## Spawn System
 

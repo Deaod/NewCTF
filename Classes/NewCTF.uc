@@ -110,6 +110,7 @@ struct PlayerAssignedTeam {
 
 var PlayerAssignedTeam AssignedPlayer[32];
 var int NumAssignedPlayers;
+var bool bPlayerInit;
 
 event InitGame(string Options, out string Error) {
     local string opt;
@@ -396,6 +397,7 @@ event PlayerPawn Login(
 ) {
     local string Password;
     local int i;
+    local PlayerPawn Result;
 
     Password = ParseOption(Options, "Password");
     if (bEnableAssignedTeams) {
@@ -417,7 +419,11 @@ event PlayerPawn Login(
         Options = Options$"?OverrideClass=Botpack.CHSpectator";
     }
 
-    return super.Login(Portal, Options, Error, SpawnClass);
+    bPlayerInit = true;
+    Result = super.Login(Portal, Options, Error, SpawnClass);
+    bPlayerInit = false;
+
+    return Result;
 }
 
 function string RemoveOption(string Options, string ToRemove) {
@@ -1003,14 +1009,14 @@ function float GetFlagTimeout() {
 }
 
 function bool ChangeTeam(Pawn Other, int NewTeam) {
-    if (bAllowChangingTeams) {
+    if (bAllowChangingTeams || bPlayerInit) {
         return super.ChangeTeam(Other, NewTeam);
     }
     return false;
 }
 
 function ChangeName(Pawn Other, string S, bool bNameChange) {
-    if (bAllowChangingNames)
+    if (bAllowChangingNames || bPlayerInit)
         super.ChangeName(Other, S, bNameChange);
 }
 

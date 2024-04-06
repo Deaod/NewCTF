@@ -169,6 +169,13 @@ function ParseAssignedTeamConfig(string Cfg) {
 
         Cfg = Mid(Cfg, Pos + 1);
     }
+
+    LogLine("Assigned Team Config:");
+    LogIndent();
+    for (Index = 0; Index < NumAssignedPlayers; Index += 1) {
+        LogLine("Player:"@AssignedPlayer[Index].PlayerName$", Pass:"@AssignedPlayer[Index].Pass$", Team:"@AssignedPlayer[Index].Team);
+    }
+    LogUnindent();
 }
 
 function ParseAssignment(string Part, int Team) {
@@ -418,6 +425,8 @@ event PlayerPawn Login(
         Options = RemoveOption(Options, "OverrideClass");
         Options = Options$"?OverrideClass=Botpack.CHSpectator";
     }
+
+    LogLine("Login Options:"@Options);
 
     bPlayerInit = true;
     Result = super.Login(Portal, Options, Error, SpawnClass);
@@ -1009,15 +1018,23 @@ function float GetFlagTimeout() {
 }
 
 function bool ChangeTeam(Pawn Other, int NewTeam) {
+    local bool Result;
     if (bAllowChangingTeams || bPlayerInit) {
-        return super.ChangeTeam(Other, NewTeam);
+        Result = super.ChangeTeam(Other, NewTeam);
+        LogLine("ChangeTeam - Allowed - "@Result);
+        return Result;
     }
+    LogLine("ChangeTeam - Forbidden");
     return false;
 }
 
 function ChangeName(Pawn Other, string S, bool bNameChange) {
-    if (bAllowChangingNames || bPlayerInit)
+    if (bAllowChangingNames || bPlayerInit) {
         super.ChangeName(Other, S, bNameChange);
+        LogLine("ChangeTeam - Allowed - "@S);
+        return;
+    }
+    LogLine("ChangeName - Forbidden");
 }
 
 function LogLine(coerce string S) {

@@ -455,7 +455,7 @@ function string RemoveOptionSingle(string Option, string ToRemove) {
 
 function string RemoveOption(string Options, string ToRemove) {
     local int Pos;
-    local string Result, Option;
+    local string Result;
 
     if (Left(Options, 1) == "?")
         Options = Mid(Options, 1);

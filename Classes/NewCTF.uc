@@ -136,7 +136,7 @@ event InitGame(string Options, out string Error) {
     if (opt != "" && !(opt ~= "false"))
         bFlagGlow = true;
 
-    GamePW = GetPropertyText("GamePassword");
+    GamePW = ConsoleCommand("get Engine.GameInfo GamePassword");
     opt = ParseOption(Options, "SpectatorPassword");
     if (opt != "" && opt != GamePW)
         SpectatorPassword = opt;
@@ -340,8 +340,8 @@ event PreLogin(
     local string InPassword;
     local string GamePW, AdminPW;
 
-    GamePW = GetPropertyText("GamePassword");
-    AdminPW = GetPropertyText("AdminPassword");
+    GamePW = ConsoleCommand("get Engine.GameInfo GamePassword");
+    AdminPW = ConsoleCommand("get Engine.GameInfo AdminPassword");
 
     InPassword = ParseOption(Options, "Password");
     Error="";

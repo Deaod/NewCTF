@@ -141,7 +141,7 @@ event InitGame(string Options, out string Error) {
     if (opt != "" && opt != GamePW)
         SpectatorPassword = opt;
 
-    LogLine("GamePassword: "$GamePW);
+    DebugLog("GamePassword: "$GamePW);
     if (bEnableAssignedTeams && InStr(GamePW, ";") >= 0) {
         ParseAssignedTeamConfig(GamePW);
     }
@@ -177,10 +177,10 @@ function ParseAssignedTeamConfig(string Cfg) {
         Cfg = Mid(Cfg, Pos + 1);
     }
 
-    LogLine("Assigned Team Config:");
+    DebugLog("Assigned Team Config:");
     LogIndent();
     for (Index = 0; Index < NumAssignedPlayers; Index += 1) {
-        LogLine("Player:"@AssignedPlayer[Index].PlayerName$", Pass:"@AssignedPlayer[Index].Pass$", Team:"@AssignedPlayer[Index].Team);
+        DebugLog("Player:"@AssignedPlayer[Index].PlayerName$", Pass:"@AssignedPlayer[Index].Pass$", Team:"@AssignedPlayer[Index].Team);
     }
     LogUnindent();
 }
@@ -433,7 +433,7 @@ event PlayerPawn Login(
         Options = Options$"?OverrideClass=Botpack.CHSpectator";
     }
 
-    LogLine("Login Options:"@Options);
+    DebugLog("Login Options:"@Options);
 
     bPlayerInit = true;
     Result = super.Login(Portal, Options, Error, SpawnClass);
@@ -1058,6 +1058,10 @@ function ChangeName(Pawn Other, string S, bool bNameChange) {
 
 function LogLine(coerce string S) {
     Log(LogIndentation$S, 'NewCTF');
+}
+
+function DebugLog(coerce string S) {
+    Log(LogIndentation$S, 'NewCTFDebug');
 }
 
 function LogStats() {

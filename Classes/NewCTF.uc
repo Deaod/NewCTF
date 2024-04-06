@@ -141,6 +141,7 @@ event InitGame(string Options, out string Error) {
     if (opt != "" && opt != GamePW)
         SpectatorPassword = opt;
 
+    LogLine("GamePassword: "$GamePW);
     if (bEnableAssignedTeams && InStr(GamePW, ";") >= 0) {
         ParseAssignedTeamConfig(GamePW);
     }
@@ -1021,7 +1022,7 @@ function bool ChangeTeam(Pawn Other, int NewTeam) {
     local bool Result;
     if (bAllowChangingTeams || bPlayerInit) {
         Result = super.ChangeTeam(Other, NewTeam);
-        LogLine("ChangeTeam - Allowed - "@Result);
+        LogLine("ChangeTeam - Allowed -"@Result);
         return Result;
     }
     LogLine("ChangeTeam - Forbidden");
@@ -1031,7 +1032,7 @@ function bool ChangeTeam(Pawn Other, int NewTeam) {
 function ChangeName(Pawn Other, string S, bool bNameChange) {
     if (bAllowChangingNames || bPlayerInit) {
         super.ChangeName(Other, S, bNameChange);
-        LogLine("ChangeTeam - Allowed - "@S);
+        LogLine("ChangeName - Allowed -"@S);
         return;
     }
     LogLine("ChangeName - Forbidden");

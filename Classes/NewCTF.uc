@@ -154,9 +154,12 @@ function ParseAssignedTeamConfig(string Cfg) {
     local int Index;
 
     Index = 0;
-    while(Index < Len(AssignedTeamStrategy) && Cfg != "") {
+    while(Index < Len(AssignedTeamStrategy)) {
         Pos = InStr(Cfg, ";");
-        Part = Left(Cfg, Pos);
+        if (Pos >= 0)
+            Part = Left(Cfg, Pos);
+        else
+            Part = Cfg;
         if (Part != "") {
             Strat = Mid(AssignedTeamStrategy, Index, 1);
             Index += 1;
@@ -167,6 +170,9 @@ function ParseAssignedTeamConfig(string Cfg) {
                 ParseAssignment(Part, int(Strat));
             }
         }
+
+        if (Pos < 0)
+            break;
 
         Cfg = Mid(Cfg, Pos + 1);
     }

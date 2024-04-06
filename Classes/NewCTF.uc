@@ -436,22 +436,34 @@ event PlayerPawn Login(
     return Result;
 }
 
+function string RemoveOptionSingle(string Option, string ToRemove) {
+    local int Pos;
+
+    Pos = InStr(Option, "=");
+    if ((Pos >= 0 && Left(Option, Pos) ~= ToRemove) || (Pos < 0 && Option ~= ToRemove)) {
+        return "";
+    } else {
+        return "?" $ Option;
+    }
+}
+
 function string RemoveOption(string Options, string ToRemove) {
     local int Pos;
-    local string Result;
+    local string Result, Option;
 
-    Pos = InStr(Options, "?"$ToRemove$"=");
+    if (Left(Options, 1) == "?")
+        Options = Mid(Options, 1);
 
-    if (Pos < 0)
-        return Options; // nothing to remove;
-
-    Result = Left(Options, Pos);
-    Options = Mid(Options, Pos + Len(ToRemove) + 2);
     Pos = InStr(Options, "?");
-    if (Pos < 0)
-        return Result;
 
-    return RemoveOption(Result $ Mid(Options, Pos), ToRemove); // recurse to find all occurrences
+    while(Pos >= 0) {
+        Result = Result $ RemoveOptionSingle(Left(Options, Pos), ToRemove);
+
+        Options = Mid(Options, Pos + 1);
+        Pos = InStr(Options, "?");
+    }
+
+    return Result $ RemoveOptionSingle(Options, ToRemove);
 }
 
 function Mutator FindWarmupMutator() {

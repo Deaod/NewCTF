@@ -17,6 +17,9 @@ function SendHome() {
         }
     }
 
+    if (Level.Game.bGameEnded == false)
+        SetCollision(false, false, false);
+
     super.SendHome();
 
     // CTFFlag.SendHome calls SetLocation before SetCollision.

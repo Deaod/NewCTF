@@ -1,5 +1,9 @@
 class NewCTFFlag extends CTFFlag;
 
+// This variable is only true during Touch event when someone translocates onto
+// this flag. It is used to inhibit automatic capture during translocation.
+var bool bTouchByTranslocation;
+
 function SendHome() {
     local DeathMatchPlus G;
 
@@ -137,7 +141,7 @@ state Held {
 
         if (Level.Game.IsA('CTFGame')) {
             OwnFlag = CTFReplicationInfo(Level.Game.GameReplicationInfo).FlagList[Holder.PlayerReplicationInfo.Team];
-            if (OwnFlag != none && OwnFlag.bHome)
+            if (OwnFlag != none && OwnFlag.bHome && bTouchByTranslocation == false)
                 foreach OwnFlag.TouchingActors(class'Pawn', P)
                     if (P == Holder)
                         OwnFlag.Touch(Holder);
@@ -177,6 +181,35 @@ state Dropped {
         bKnownLocation = false;
         bHidden = false;
     }
+
+    function Touch(Actor Other) {
+        local vector Delta;
+        local string StoredFixFlagBasePickup;
+        local bool bRestoreFixFlagBasePickup;
+
+        if (Other.IsA('Pawn')) {
+            // This prevents scoring when you translocate onto the enemy flag
+            // while you're on your team's FlagBase with your team's flag Home.
+            // bFixFlagBasePickup was introduced in 469, so avoid creating a
+            // direct reference to it in order to maintain 436 compatibility.
+            Delta = Location - Other.Location;
+            if ((Abs(Delta.Z) > CollisionHeight + Other.CollisionHeight) ||
+                (VSize(Delta * vect(1,1,0)) > CollisionRadius + Other.CollisionRadius)
+            ) {
+                StoredFixFlagBasePickup = Level.Game.GetPropertyText("bFixFlagBasePickup");
+                bRestoreFixFlagBasePickup = true;
+                Level.Game.SetPropertyText("bFixFlagBasePickup", "False");
+                bTouchByTranslocation = true;
+            }
+        }
+
+        super.Touch(Other);
+
+        if (bRestoreFixFlagBasePickup) {
+            Level.Game.SetPropertyText("bFixFlagBasePickup", StoredFixFlagBasePickup);
+            bTouchByTranslocation = false;
+        }
+    }
 }
 
 function SetHolderLighting() {
@@ -191,8 +224,9 @@ function SetHolderLighting() {
     }
 }
 
-DefaultProperties
-{
+defaultproperties {
+    bTouchByTranslocation=False
+
     bAlwaysRelevant=True
     bSimFall=True
 }

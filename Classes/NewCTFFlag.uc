@@ -150,12 +150,15 @@ state Held {
 }
 
 auto state Home {
-    function Touch(Actor A) {
+    function Touch(Actor Other) {
         local Pawn P;
+        local vector Delta;
+        local string StoredFixFlagBasePickup;
+        local bool bRestoreFixFlagBasePickup;
 
-        P = Pawn(A);
+        P = Pawn(Other);
         if (P == none || P.bIsPlayer == false || P.Health <= 0) {
-            super.Touch(A);
+            super.Touch(Other);
             return;
         }
 
@@ -169,7 +172,28 @@ auto state Home {
             );
         }
 
-        super.Touch(A);
+        if (Other.IsA('Pawn')) {
+            // This prevents scoring when you translocate onto the enemy flag
+            // while you're on your team's FlagBase with your team's flag Home.
+            // bFixFlagBasePickup was introduced in 469, so avoid creating a
+            // direct reference to it in order to maintain 436 compatibility.
+            Delta = Location - Other.Location;
+            if ((Abs(Delta.Z) > CollisionHeight + Other.CollisionHeight) ||
+                (VSize(Delta * vect(1,1,0)) > CollisionRadius + Other.CollisionRadius)
+            ) {
+                StoredFixFlagBasePickup = Level.Game.GetPropertyText("bFixFlagBasePickup");
+                bRestoreFixFlagBasePickup = true;
+                Level.Game.SetPropertyText("bFixFlagBasePickup", "False");
+                bTouchByTranslocation = true;
+            }
+        }
+
+        super.Touch(Other);
+
+        if (bRestoreFixFlagBasePickup) {
+            Level.Game.SetPropertyText("bFixFlagBasePickup", StoredFixFlagBasePickup);
+            bTouchByTranslocation = false;
+        };
     }
 }
 
